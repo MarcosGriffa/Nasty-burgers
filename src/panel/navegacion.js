@@ -56,7 +56,7 @@ export const MODULOS = [
     tipo: 'tabs',
     secciones: [
       { id: 'preguntar', titulo: 'Preguntar', pantalla: 'Preguntar' },
-      { id: 'precios', titulo: 'Cambiar precios', pantalla: 'Asistente' },
+      { id: 'precios', titulo: 'Cambiar la carta', pantalla: 'Asistente' },
     ],
   },
   {

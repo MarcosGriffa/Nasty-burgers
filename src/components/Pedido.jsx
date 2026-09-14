@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useMenuPublico } from '../lib/menu'
 import { normalizar, pesos } from '../lib/utils'
 import Carrito from './Carrito'
+import Opciones from './Opciones'
 import Foto from './Foto'
 
 function ItemCard({ item, cantidad, onAgregar, onQuitar, indice = 0 }) {
@@ -78,7 +79,10 @@ export default function Pedido({ carrito, drawerAbierto, setDrawerAbierto }) {
 
   // La carta sale de la misma tabla de productos que edita el panel: lo que el
   // empleado agrega o cambia allá, aparece acá.
-  const { secciones } = useMenuPublico()
+  const { secciones, gruposModificadores } = useMenuPublico()
+
+  // el producto que el cliente está armando en la ventana de opciones
+  const [armando, setArmando] = useState(null)
 
   const categorias = useMemo(() => {
     const q = normalizar(busqueda.trim())
@@ -92,6 +96,19 @@ export default function Pedido({ carrito, drawerAbierto, setDrawerAbierto }) {
       }))
       .filter((c) => c.items.length > 0)
   }, [busqueda, secciones])
+
+  // Si el producto tiene grupos de opciones, primero se abre la ventana; si no,
+  // va derecho al carrito como hasta ahora.
+  const gruposDe = (item) =>
+    (item.modificadores ?? [])
+      .map((n) => gruposModificadores.find((g) => g.nombre === n))
+      .filter((g) => g?.opciones?.length)
+
+  const pedir = (item) => {
+    const grupos = gruposDe(item)
+    if (grupos.length) setArmando({ item, grupos })
+    else carrito.agregar(item)
+  }
 
   return (
     <section id="menu" className="relative bg-ink py-16 sm:py-24">
@@ -188,8 +205,8 @@ export default function Pedido({ carrito, drawerAbierto, setDrawerAbierto }) {
                       indice={i}
                       item={item}
                       cantidad={carrito.cantidadDe(item.id)}
-                      onAgregar={carrito.agregar}
-                      onQuitar={carrito.quitar}
+                      onAgregar={pedir}
+                      onQuitar={carrito.quitarPorProducto}
                     />
                   ))}
                 </div>
@@ -220,6 +237,15 @@ export default function Pedido({ carrito, drawerAbierto, setDrawerAbierto }) {
             <span className="display text-lg">{pesos(carrito.subtotal)}</span>
           </button>
         </div>
+      )}
+
+      {armando && (
+        <Opciones
+          item={armando.item}
+          grupos={armando.grupos}
+          onAgregar={carrito.agregar}
+          onCerrar={() => setArmando(null)}
+        />
       )}
 
       {/* drawer del carrito en mobile */}

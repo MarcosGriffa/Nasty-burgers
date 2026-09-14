@@ -53,11 +53,18 @@ const leerPref = (k, def) => {
  */
 async function descontarStock(pedido, productos, ingredientes) {
   const gasto = new Map()
+  const sumar = (ingrediente, cantidad) =>
+    gasto.set(ingrediente, (gasto.get(ingrediente) || 0) + cantidad)
+
   ;(pedido.items || []).forEach((linea) => {
     const prod = productos.find((p) => p.nombre === linea.nombre)
     if (!prod?.controlar_stock || !prod.receta?.length) return
-    prod.receta.forEach((r) => {
-      gasto.set(r.ingrediente, (gasto.get(r.ingrediente) || 0) + cantidadBruta(r) * linea.cantidad)
+    prod.receta.forEach((r) => sumar(r.ingrediente, cantidadBruta(r) * linea.cantidad))
+
+    // Lo que el cliente eligió también sale del stock: el sazonado de las
+    // papas, el bacon del extra. Si no, el inventario miente.
+    ;(linea.opciones || []).forEach((o) => {
+      if (o.ingrediente && o.cantidad) sumar(o.ingrediente, o.cantidad * linea.cantidad)
     })
   })
 

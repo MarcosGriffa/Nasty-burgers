@@ -135,9 +135,16 @@ export default function Comanda({ pedido, onAceptar, onRechazar, onAvanzar, onCo
       <ul className="mt-3 space-y-1">
         {pedido.items.map((it, i) => (
           <li key={i} className="flex justify-between gap-3 text-sm">
-            <span className="text-paper">
+            <span className="min-w-0 text-paper">
               <span className="display mr-2 text-amber">{it.cantidad}×</span>
               {it.nombre}
+              {/* Lo que eligió el cliente: papas sazonadas, sin cebolla, extras.
+                  Va debajo del nombre porque la cocina lo necesita ver sin abrir nada. */}
+              {it.opciones?.length > 0 && (
+                <span className="mt-0.5 block pl-7 text-xs leading-snug text-amber/80">
+                  {it.opciones.map((o) => o.opcion).join(' · ')}
+                </span>
+              )}
             </span>
             <span className="shrink-0 text-ash">{pesos(it.precio * it.cantidad)}</span>
           </li>

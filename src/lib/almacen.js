@@ -88,7 +88,7 @@ function sembrarSiHaceFalta(nombre, semilla) {
  *
  * Al cambiar de versión (v4, v5...) el parche vuelve a correr una vez.
  */
-const PARCHE = 'nasty.parche.carta.v4'
+const PARCHE = 'nasty.parche.carta.v5'
 
 // Productos que ya no existen y hay que sacar de las computadoras
 // donde quedaron sembrados.
@@ -113,7 +113,7 @@ const marcarCorrido = (nombre) => {
   }
 }
 
-function ponerAlDiaIngredientes() {
+function ponerAlDiaIngredientes(semilla = []) {
   const actuales = leer('ingredientes')
   if (!actuales.length) return
   let cambio = false
@@ -123,6 +123,22 @@ function ponerAlDiaIngredientes() {
     cambio = true
     return { ...i, nombre: nuevoNombre }
   })
+
+  // Ingredientes que la carta empezó a usar y el local todavía no tiene
+  // cargados (el Sazonado Nasty de las papas, por ejemplo). Entran con stock 0:
+  // cuánto hay en la heladera lo sabe el local, no la semilla.
+  const tengo = new Set(nuevos.map((i) => i.nombre))
+  semilla.forEach((s) => {
+    if (tengo.has(s.nombre)) return
+    cambio = true
+    nuevos.push({
+      id: nuevoId(),
+      creado_en: new Date().toISOString(),
+      ...s,
+      stock: 0,
+    })
+  })
+
   if (cambio) escribir('ingredientes', nuevos)
 }
 
@@ -163,6 +179,13 @@ function ponerAlDiaProductos(semilla) {
       if (!p.costo_manual) cambios.costo = base.costo
     }
 
+    // qué puede elegir el cliente. Se completa una sola vez, cuando el producto
+    // todavía no tiene ninguno: si el local ya le sacó o le agregó un grupo a
+    // mano desde el panel, eso manda.
+    if (base.modificadores?.length && !(p.modificadores ?? []).length) {
+      cambios.modificadores = base.modificadores
+    }
+
     if (!Object.keys(cambios).length) return p
     cambio = true
     return { ...p, ...cambios }
@@ -171,11 +194,28 @@ function ponerAlDiaProductos(semilla) {
   if (cambio) escribir('productos', nuevos)
 }
 
-function completarFotos(nombre, semilla) {
-  if (nombre !== 'productos' && nombre !== 'ingredientes') return
+/**
+ * Los grupos de opciones viejos eran una maqueta: tenían nombre y poco más,
+ * sin las opciones que ve el cliente. Como no hay nada del local que valga la
+ * pena conservar ahí, se reemplazan enteros por los de la carta.
+ */
+function ponerAlDiaGrupos(semilla) {
+  const actuales = leer('grupos_modificadores')
+  if (!actuales.length) return
+  const alguno = actuales.some((g) => (g.opciones ?? []).length)
+  if (alguno) return // ya están los nuevos, o el local los editó
+  escribir(
+    'grupos_modificadores',
+    semilla.map((g) => ({ id: nuevoId(), creado_en: new Date().toISOString(), ...g })),
+  )
+}
+
+function ponerAlDia(nombre, semilla) {
+  if (!['productos', 'ingredientes', 'grupos_modificadores'].includes(nombre)) return
   if (yaCorrio(nombre)) return
   // los ingredientes se renombran primero: las recetas nuevas ya los nombran así
-  if (nombre === 'ingredientes') ponerAlDiaIngredientes()
+  if (nombre === 'ingredientes') ponerAlDiaIngredientes(semilla)
+  else if (nombre === 'grupos_modificadores') ponerAlDiaGrupos(semilla)
   else ponerAlDiaProductos(semilla)
   marcarCorrido(nombre)
 }
@@ -228,7 +268,7 @@ export function suscribir(nombre, alCambiar, semilla) {
 
   if (modoDemo) {
     sembrarSiHaceFalta(nombre, semilla)
-    completarFotos(nombre, semilla)
+    ponerAlDia(nombre, semilla)
     const emitir = () => alCambiar(leer(nombre))
     emitir()
     if (!oyentes.has(nombre)) oyentes.set(nombre, new Set())

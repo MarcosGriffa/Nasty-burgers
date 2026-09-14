@@ -69,6 +69,14 @@ const ESTILO = (ancho) => `
     font-size: 19px;
     font-weight: 700;
   }
+  /* Lo que el cliente eligió: papas sazonadas, sin cebolla, extra bacon. Va
+     más chico que el producto pero igual de legible desde la plancha. */
+  .items .opciones {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
+    padding-left: 4px;
+  }
 
   .caja {
     margin-top: 6px;
@@ -127,7 +135,13 @@ const lineas = (pedido, conPrecio) =>
     .map(
       (i) => `<tr>
         <td class="cant b">${i.cantidad}x</td>
-        <td>${escapar(i.nombre)}</td>
+        <td>${escapar(i.nombre)}${
+          i.opciones?.length
+            ? `<br><span style="font-size:11px">${i.opciones
+                .map((o) => escapar(o.opcion))
+                .join(', ')}</span>`
+            : ''
+        }</td>
         ${conPrecio ? `<td class="prec">${pesos(i.precio * i.cantidad)}</td>` : ''}
       </tr>`,
     )
@@ -159,7 +173,13 @@ export function imprimirComandaCocina(pedido) {
         .map(
           (i) => `<tr>
             <td class="cant">${i.cantidad}</td>
-            <td>${escapar(i.nombre).toUpperCase()}</td>
+            <td>${escapar(i.nombre).toUpperCase()}${
+              i.opciones?.length
+                ? `<div class="opciones">${i.opciones
+                    .map((o) => `&gt; ${escapar(o.opcion).toUpperCase()}`)
+                    .join('<br>')}</div>`
+                : ''
+            }</td>
           </tr>`,
         )
         .join('')}
@@ -194,6 +214,7 @@ export function imprimirTicket(pedido) {
     <table>
       <tr><td>Subtotal</td><td class="prec">${pesos(pedido.subtotal ?? pedido.total)}</td></tr>
       ${pedido.descuento ? `<tr><td>Descuento</td><td class="prec">-${pesos(pedido.descuento)}</td></tr>` : ''}
+      ${pedido.envio ? `<tr><td>Envío</td><td class="prec">${pesos(pedido.envio)}</td></tr>` : ''}
       <tr class="g"><td>TOTAL</td><td class="prec">${pesos(pedido.total)}</td></tr>
       <tr><td>Pago</td><td class="prec">${escapar(pago[pedido.pago] ?? pedido.pago ?? '-')}</td></tr>
     </table>

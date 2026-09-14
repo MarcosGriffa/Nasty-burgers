@@ -220,7 +220,12 @@ end $$;
 do $$
 declare
   t text;
-  publicas text[] := array['productos', 'cat_productos', 'ingredientes', 'ajustes', 'zonas_envio'];
+  -- grupos_modificadores va acá porque la web tiene que poder mostrarle al
+  -- cliente las papas normales o sazonadas antes de que se loguee nadie.
+  publicas text[] := array[
+    'productos', 'cat_productos', 'ingredientes', 'grupos_modificadores',
+    'ajustes', 'zonas_envio'
+  ];
 begin
   foreach t in array publicas loop
     execute format('drop policy if exists "lectura publica" on public.%I', t);

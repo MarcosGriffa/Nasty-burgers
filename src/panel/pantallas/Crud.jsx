@@ -5,6 +5,14 @@ import { aCSV, descargar, normalizar, pesos } from '../../lib/utils'
 import Tabla, { valorCelda } from '../comp/Tabla'
 import { Boton, Buscador, Campo, Chip, Encabezado, Modal } from '../comp/ui'
 import EditorProducto from './EditorProducto'
+import EditorModificador from './EditorModificador'
+
+// Entidades que en vez del formulario genérico abren una pantalla propia.
+// La clave es lo que la entidad declara en `editor`.
+const EDITORES = {
+  producto: (props) => <EditorProducto producto={props.fila} {...props} />,
+  modificador: (props) => <EditorModificador grupo={props.fila} {...props} />,
+}
 
 function Formulario({ def, inicial, onGuardar, onCerrar }) {
   const [datos, setDatos] = useState(() => {
@@ -164,7 +172,7 @@ export default function Crud({ coleccion }) {
           agrupar={def.agrupar}
           onSeleccionar={(f) => {
             setSel(f.id)
-            if (def.editor === 'producto') setForm({ modo: 'editar' })
+            if (def.editor) setForm({ modo: 'editar' })
           }}
           seleccionadaId={sel}
           vacio={busqueda ? `No encontramos nada con «${busqueda}».` : `Todavía no hay ${def.titulo.toLowerCase()}.`}
@@ -182,23 +190,23 @@ export default function Crud({ coleccion }) {
         )}
       </div>
 
-      {form && def.editor === 'producto' && (
-        <EditorProducto
-          producto={form.modo === 'editar' ? seleccionada : null}
-          onCerrar={() => setForm(null)}
-          onEliminar={() => {
+      {form &&
+        def.editor &&
+        EDITORES[def.editor]({
+          fila: form.modo === 'editar' ? seleccionada : null,
+          onCerrar: () => setForm(null),
+          onEliminar: () => {
             setForm(null)
             setConfirmar(true)
-          }}
-          onGuardar={async (datos) => {
+          },
+          onGuardar: async (datos) => {
             if (form.modo === 'editar') await actualizar(seleccionada.id, datos)
             else await crear(datos)
             setForm(null)
-          }}
-        />
-      )}
+          },
+        })}
 
-      {form && def.editor !== 'producto' && (
+      {form && !def.editor && (
         <Formulario
           def={def}
           inicial={form.modo === 'editar' ? seleccionada : null}

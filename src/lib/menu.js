@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useColeccion } from './almacen'
-import { CAT_PRODUCTOS, INGREDIENTES, PRODUCTOS } from '../data/semillas'
+import { CAT_PRODUCTOS, GRUPOS_MODIFICADORES, INGREDIENTES, PRODUCTOS } from '../data/semillas'
 
 /**
  * El menú que ve el cliente sale de la MISMA tabla de productos que edita el
@@ -101,6 +101,7 @@ export function armarMenu(productos, categorias, ingredientes) {
     categoriaId: slug(p.categoria || 'otros'),
     categoriaNombre: p.categoria,
     subcategoria: p.subcategoria,
+    modificadores: p.modificadores ?? [],
   })
 
   catsOrdenadas.forEach(([nombreCat, lista]) => {
@@ -141,6 +142,7 @@ export function useMenuPublico() {
   const { filas: productos, cargando } = useColeccion('productos', PRODUCTOS)
   const { filas: categorias } = useColeccion('cat_productos', CAT_PRODUCTOS)
   const { filas: ingredientes } = useColeccion('ingredientes', INGREDIENTES)
+  const { filas: gruposModificadores } = useColeccion('grupos_modificadores', GRUPOS_MODIFICADORES)
 
   const secciones = useMemo(
     () => armarMenu(productos, categorias, ingredientes),
@@ -149,5 +151,5 @@ export function useMenuPublico() {
 
   const todos = useMemo(() => secciones.flatMap((s) => s.items), [secciones])
 
-  return { secciones, todos, productos, ingredientes, cargando }
+  return { secciones, todos, productos, ingredientes, gruposModificadores, cargando }
 }

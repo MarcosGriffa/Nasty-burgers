@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { LOCALES, NEGOCIO } from '../data/negocio'
 import { nombreCompleto, pesos, soloDigitos } from '../lib/utils'
 import { crearPedido } from '../lib/pedidos'
+import { precioConOpciones } from '../hooks/useCarrito'
 import { modoDemo } from '../lib/supabase'
 
 const PAGOS = [
@@ -75,7 +76,8 @@ export default function Carrito({ carrito, modalidad, localId, onLocal, onCerrar
           id: li.item.id,
           nombre: nombreCompleto(li.item),
           cantidad: li.cantidad,
-          precio: li.item.precio,
+          precio: precioConOpciones(li.item, li.opciones),
+          opciones: li.opciones ?? [],
         })),
         subtotal,
         descuento,
@@ -191,17 +193,24 @@ export default function Carrito({ carrito, modalidad, localId, onLocal, onCerrar
         ) : (
           <ul className="space-y-3">
             {lineas.map((li) => (
-              <li key={li.item.id} className="flex items-start gap-3">
+              <li key={li.clave} className="flex items-start gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm leading-tight font-bold text-balance text-paper">
                     {nombreCompleto(li.item)}
                   </p>
-                  <p className="text-xs text-ash">{pesos(li.item.precio)} c/u</p>
+                  {li.opciones?.length > 0 && (
+                    <p className="mt-0.5 text-[11px] leading-snug text-amber">
+                      {li.opciones.map((o) => o.opcion).join(' · ')}
+                    </p>
+                  )}
+                  <p className="text-xs text-ash">
+                    {pesos(precioConOpciones(li.item, li.opciones))} c/u
+                  </p>
                 </div>
                 <div className="flex items-center gap-2 rounded-full border border-white/15 px-1.5 py-1">
                   <button
                     type="button"
-                    onClick={() => quitar(li.item.id)}
+                    onClick={() => quitar(li.clave)}
                     aria-label={`Quitar uno de ${nombreCompleto(li.item)}`}
                     className="h-6 w-6 rounded-full text-paper hover:bg-white/10"
                   >
@@ -212,7 +221,7 @@ export default function Carrito({ carrito, modalidad, localId, onLocal, onCerrar
                   </span>
                   <button
                     type="button"
-                    onClick={() => agregar(li.item)}
+                    onClick={() => agregar(li.item, li.opciones)}
                     aria-label={`Agregar uno de ${nombreCompleto(li.item)}`}
                     className="h-6 w-6 rounded-full text-paper hover:bg-white/10"
                   >
@@ -220,11 +229,11 @@ export default function Carrito({ carrito, modalidad, localId, onLocal, onCerrar
                   </button>
                 </div>
                 <div className="w-20 text-right text-sm font-bold text-amber">
-                  {pesos(li.item.precio * li.cantidad)}
+                  {pesos(precioConOpciones(li.item, li.opciones) * li.cantidad)}
                 </div>
                 <button
                   type="button"
-                  onClick={() => eliminar(li.item.id)}
+                  onClick={() => eliminar(li.clave)}
                   aria-label={`Eliminar ${nombreCompleto(li.item)}`}
                   className="text-ash hover:text-flame"
                 >

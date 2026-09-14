@@ -50,8 +50,13 @@ alter table public.cat_ingredientes
   add column if not exists nombre text;
 
 -- Grupos modificadores -------------------------------------------------------
+-- `opciones` es la lista que ve el cliente: [{nombre, precio, ingrediente?, cantidad?}].
+-- Las que tienen ingrediente descuentan stock al aceptar el pedido (las papas
+-- sazonadas se llevan su sazonador).
 alter table public.grupos_modificadores
   add column if not exists nombre    text,
+  add column if not exists bajada    text,
+  add column if not exists opciones  jsonb   default '[]'::jsonb,
   add column if not exists productos integer default 0,
   add column if not exists minimo    integer default 0,
   add column if not exists maximo    integer default 0;
@@ -209,7 +214,8 @@ do $$
 declare t text;
 begin
   foreach t in array array[
-    'productos','ingredientes','cat_productos','gastos','movimientos_caja',
+    'productos','ingredientes','cat_productos','grupos_modificadores',
+    'gastos','movimientos_caja',
     'movimientos_stock','arqueos','descuentos','listas_precios','zonas_envio',
     'historial_precios','ajustes'
   ] loop

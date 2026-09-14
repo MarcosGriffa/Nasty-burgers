@@ -58,6 +58,7 @@ export const INGREDIENTES = [
   ing('Roquefort', 'Queso', 'g', 14, 800),
   ing('Pan de papa', 'Pan', 'un.', 780, 600),
   ing('Papas fritas', 'Papas fritas', 'g', 3, 42000),
+  ing('Sazonado Nasty', 'Papas fritas', 'g', 22, 2400),
   ing('Cebolla en cubitos', 'Verduras', 'g', 2, 3500),
   ing('Cebolla morada', 'Verduras', 'g', 3, 2200),
   ing('Cebolla crispy', 'Verduras', 'g', 12, 1400),
@@ -182,7 +183,11 @@ export const PRODUCTOS = [
       controlar_stock: receta.length > 0,
       vender_sin_stock: true,
       proveedor: '',
-      modificadores: [],
+      // Toda hamburguesa es un combo: viene con papas y el cliente elige el
+      // tipo. Los demás grupos son opcionales.
+      modificadores: receta.some((r) => r.ingrediente === 'Papas fritas')
+        ? ['Papas', 'Punto de la carne', 'Extras', 'Sin qué']
+        : [],
     }
   }),
 ]
@@ -214,15 +219,54 @@ export const CAT_INGREDIENTES = [
 ]
 
 export const GRUPOS_MODIFICADORES = [
-  { nombre: 'Bebida', productos: 4, minimo: 0, maximo: 1 },
-  { nombre: 'Extras', productos: 5, minimo: 0, maximo: 4 },
-  { nombre: 'Papas fritas S o N', productos: 2, minimo: 1, maximo: 1 },
-  { nombre: 'Papas Fritas S o N Promo', productos: 2, minimo: 4, maximo: 4 },
-  { nombre: 'Promo 2x1', productos: 7, minimo: 1, maximo: 2 },
-  { nombre: 'Promo 3x4 Dobles', productos: 8, minimo: 4, maximo: 4 },
-  { nombre: 'Promo 3x4 Simples', productos: 8, minimo: 4, maximo: 4 },
-  { nombre: 'Promo 4x3 Triples', productos: 8, minimo: 4, maximo: 4 },
+  {
+    nombre: 'Papas',
+    bajada: 'Todas las burgas vienen con papas. Elegí cómo las querés.',
+    minimo: 1,
+    maximo: 1,
+    opciones: [
+      { nombre: 'Papas normales', precio: 0 },
+      // el sazonado se descuenta del stock aunque no cambie el precio
+      { nombre: 'Papas sazonadas', precio: 0, ingrediente: 'Sazonado Nasty', cantidad: 8 },
+    ],
+  },
+  {
+    nombre: 'Punto de la carne',
+    bajada: 'Si no elegís, sale a punto.',
+    minimo: 0,
+    maximo: 1,
+    opciones: [
+      { nombre: 'A punto', precio: 0 },
+      { nombre: 'Bien cocida', precio: 0 },
+    ],
+  },
+  {
+    nombre: 'Extras',
+    bajada: 'Sumale lo que quieras.',
+    minimo: 0,
+    maximo: 4,
+    opciones: [
+      { nombre: 'Bacon', precio: 1500, ingrediente: 'Bacon', cantidad: 30 },
+      { nombre: 'Cheddar x2', precio: 1500, ingrediente: 'Cheddar en fetas', cantidad: 2 },
+      { nombre: 'Medallón + cheddar', precio: 4700, ingrediente: 'Medallón 120 g', cantidad: 1 },
+      { nombre: 'Cebolla crispy', precio: 1200, ingrediente: 'Cebolla crispy', cantidad: 20 },
+    ],
+  },
+  {
+    nombre: 'Sin qué',
+    bajada: 'Si hay algo que no te va, marcalo.',
+    minimo: 0,
+    maximo: 5,
+    opciones: [
+      { nombre: 'Sin cebolla', precio: 0 },
+      { nombre: 'Sin pepinillos', precio: 0 },
+      { nombre: 'Sin tomate', precio: 0 },
+      { nombre: 'Sin mayonesa', precio: 0 },
+      { nombre: 'Sin ketchup', precio: 0 },
+    ],
+  },
 ]
+
 
 export const PROVEEDORES = [
   { nombre: 'Agua Ivess', email: '', telefono: '', direccion: '', saldo: 0 },

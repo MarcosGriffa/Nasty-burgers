@@ -97,16 +97,28 @@ export const ENTIDADES = {
     titulo: 'Grupos modificadores',
     singular: 'grupo',
     semilla: S.GRUPOS_MODIFICADORES,
-    buscar: ['nombre'],
+    editor: 'modificador', // pantalla propia: las opciones son una tabla, no un campo
+    buscar: ['nombre', 'bajada'],
     columnas: [
       { k: 'nombre', label: 'Nombre', principal: true },
-      { k: 'productos', label: 'Cantidad de productos', num: true },
+      { k: 'bajada', label: 'Bajada' },
+      {
+        k: 'opciones',
+        label: 'Opciones',
+        num: true,
+        calc: (f) => (f.opciones?.length ? f.opciones.length : '—'),
+      },
+      {
+        k: 'obligatorio',
+        label: '¿Obligatorio?',
+        calc: (f) => ((f.minimo ?? 0) >= 1 ? 'sí' : 'no'),
+      },
       { k: 'minimo', label: 'Cant. mínima', num: true },
       { k: 'maximo', label: 'Cant. máxima', num: true },
     ],
     campos: [
       t('nombre', 'Nombre', { requerido: true }),
-      n('productos', 'Cantidad de productos'),
+      t('bajada', 'Bajada'),
       n('minimo', 'Cantidad mínima'),
       n('maximo', 'Cantidad máxima'),
     ],
