@@ -1,0 +1,52 @@
+IMPRESION DIRECTA DE LA COMANDA
+================================
+
+El problema: ningun navegador deja que una pagina web imprima sola sin avisar.
+Es una proteccion de seguridad (si no, cualquier pagina te vaciaria el toner).
+Por eso, abierto de la forma normal, Chrome siempre muestra el cuadro de
+"Imprimir".
+
+La solucion, que es la que usan todos los sistemas de punto de venta web:
+abrir Chrome con la opcion --kiosk-printing. Con esa opcion, cuando la pagina
+manda a imprimir, Chrome imprime directo en la impresora PREDETERMINADA de
+Windows, sin mostrar nada.
+
+COMO DEJARLO ANDANDO (una sola vez)
+-----------------------------------
+
+1. Instalar la termica en Windows y dejarla como PREDETERMINADA.
+   Configuracion > Bluetooth y dispositivos > Impresoras y escaneres >
+   elegir la termica > "Establecer como predeterminada".
+
+2. Abrir "Nasty - impresion directa.bat" con el Bloc de notas y cambiar la
+   linea que dice:
+
+       set DIRECCION=file:///C:/Users/marqu/Downloads/nasty-sistema-local.html
+
+   por la direccion real del sistema. Si esta publicado en internet, va la URL
+   con /#/panel al final.
+
+3. Click derecho en el .bat > "Mostrar mas opciones" > "Enviar a" >
+   "Escritorio (crear acceso directo)".
+
+4. Abrir el sistema SIEMPRE desde ese acceso directo.
+
+A partir de ahi: el empleado toca "Aceptar pedido", elige la demora, y la
+comanda sale sola por la termica. No aparece ningun cuadro de dialogo.
+
+PROBAR QUE FUNCIONA
+-------------------
+
+En el sistema: Configuracion > Opciones de impresion > "Imprimir comanda de
+prueba". Si sale el papel sin que aparezca ninguna ventana, esta listo.
+
+SI PREFIEREN NO USAR EL .BAT
+----------------------------
+
+Se puede lograr lo mismo agregando --kiosk-printing al acceso directo de
+Chrome que ya usan: click derecho en el acceso directo > Propiedades > en
+"Destino", al final de todo (despues de las comillas) agregar un espacio y
+--kiosk-printing.
+
+Ojo: eso afecta a TODO Chrome, no solo al sistema. Por eso el .bat usa un
+perfil aparte.

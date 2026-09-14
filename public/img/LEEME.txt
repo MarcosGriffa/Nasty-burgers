@@ -1,0 +1,35 @@
+FOTOS DE NASTY BURGERS
+======================
+
+Las fotos que ya están cargadas viven en src/img/ y viajan DENTRO del archivo
+de la página: por eso se ven igual abriendo el HTML suelto desde la PC, sin
+necesidad de llevar esta carpeta al lado.
+
+Esta carpeta (public/img/) es para agregar fotos NUEVAS sin recompilar nada,
+cuando la página está publicada en internet:
+
+  1) Poné acá el archivo, cuadrado y de menos de 300 KB
+     (por ejemplo: nueva-burger.jpg).
+  2) En el panel, entrá al producto -> "Qué ven tus clientes" -> campo Foto,
+     y escribí el nombre del archivo tal cual, con el .jpg.
+
+Nombres que ya están en uso:
+
+  hero.webp   la foto grande de la portada: la Critical Doble recortada,
+              con fondo transparente
+
+  critical-s.jpg  critical-d.jpg  critical-t.jpg
+  nasty-s.jpg     nasty-d.jpg     nasty-t.jpg
+  dirty-s.jpg     dirty-d.jpg     dirty-t.jpg
+  sick-s.jpg      sick-d.jpg      sick-t.jpg
+  gross-s.jpg     gross-d.jpg     gross-t.jpg
+  muddy-s.jpg     muddy-d.jpg     muddy-t.jpg
+  stinky-s.jpg    stinky-d.jpg    stinky-t.jpg
+  melt-s.jpg      melt-d.jpg      melt-t.jpg
+
+  (-s = simple, -d = doble, -t = triple)
+
+Las de Melt son las de la Melt 2.0, y las usa tanto la del menú como la
+promo de los miércoles.
+
+Todavía sin foto propia: NBC, La Pampera, las papas y las bebidas.
