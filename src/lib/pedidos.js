@@ -118,8 +118,12 @@ export async function actualizarPedido(id, cambios) {
 }
 
 /** Escucha los pedidos del dia. Devuelve una funcion para desuscribirse. */
-/** Cuántos días de historial se traen del servidor para los reportes. */
-export const VENTANA_DIAS = 120
+/**
+ * Cuántos días de historial se traen del servidor para los reportes.
+ * El Balance grafica 9 meses, así que la ventana tiene que cubrirlos: con
+ * menos, los meses más viejos del gráfico dan siempre cero.
+ */
+export const VENTANA_DIAS = 300
 
 export function suscribirPedidos(alCambiar) {
   if (modoDemo) {

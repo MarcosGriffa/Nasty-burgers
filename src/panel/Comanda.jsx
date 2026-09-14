@@ -39,12 +39,20 @@ export default function Comanda({ pedido, onAceptar, onRechazar, onAvanzar, onCo
   const bloqueadoPorEfectivo =
     siguiente === 'entregado' && esEfectivo && !pedido.efectivo_cobrado
 
+  // El pedido entero, no un resumen: los mensajes usan el local, la dirección
+  // y los importes. Si se le pasan de a pedazos, el WhatsApp sale con $0.
   const avisar = (plantilla) => {
     const texto = plantilla({
-      nombre: pedido.cliente_nombre.split(' ')[0],
+      nombre: pedido.cliente_nombre,
       numero: pedido.numero,
       minutos: pedido.demora_min,
       modalidad: pedido.modalidad,
+      local: pedido.local,
+      direccion: pedido.direccion,
+      subtotal: pedido.subtotal,
+      descuento: pedido.descuento,
+      envio: pedido.envio,
+      total: pedido.total,
     })
     window.open(
       linkWhatsapp(telefonoWhatsapp(pedido.cliente_telefono), texto),
