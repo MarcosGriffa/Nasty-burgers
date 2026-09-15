@@ -4,6 +4,13 @@
 -- Todo es "add column if not exists": se puede volver a correr sin romper nada.
 -- ---------------------------------------------------------------------------
 
+-- Pedidos --------------------------------------------------------------------
+-- Lo que se cobró de envío en ESE pedido. Se guarda en el pedido y no se lee
+-- de los ajustes, porque si mañana sube el envío los pedidos viejos tienen que
+-- seguir mostrando lo que se cobró de verdad.
+alter table public.pedidos
+  add column if not exists envio integer not null default 0;
+
 -- Productos ------------------------------------------------------------------
 alter table public.productos
   add column if not exists nombre               text,
@@ -191,6 +198,8 @@ alter table public.ajustes
   add column if not exists facebook                    text,
   add column if not exists monto_minimo_activo         boolean default false,
   add column if not exists monto_minimo                integer default 0,
+  -- uno solo para todas las zonas: se cobra lo mismo llegue a donde llegue
+  add column if not exists costo_envio                 integer default 3000,
   add column if not exists ocultar_sin_stock           boolean default true,
   add column if not exists alertas_sonoras             boolean default true,
   add column if not exists imprimir_al_aceptar         boolean default true,

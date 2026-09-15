@@ -363,11 +363,9 @@ export const CATEGORIAS_WEB = CATEGORIAS.map((c) => c.nombre)
 // TIENDA ONLINE
 // ---------------------------------------------------------------------------
 
-export const ZONAS_ENVIO = [
-  { zona: 'Benavídez centro', hasta_km: 3, costo: 1500 },
-  { zona: 'Benavídez resto', hasta_km: 6, costo: 2500 },
-  { zona: 'Nordelta / Garín', hasta_km: 10, costo: 3800 },
-]
+// El envío es uno solo para todas las zonas: se cobra lo mismo llegue a donde
+// llegue. El número se edita en el panel (Tienda → Envíos).
+export const COSTO_ENVIO = 3000
 
 const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
@@ -384,6 +382,7 @@ export const AJUSTES_INICIALES = [
     facebook: '',
     monto_minimo_activo: false,
     monto_minimo: 0,
+    costo_envio: COSTO_ENVIO,
     ocultar_sin_stock: true,
     alertas_sonoras: true,
     imprimir_al_aceptar: true,

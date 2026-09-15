@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useMenuPublico } from '../lib/menu'
+import { useTienda } from '../lib/tienda'
 import { normalizar, pesos } from '../lib/utils'
 import Carrito from './Carrito'
 import Opciones from './Opciones'
@@ -84,6 +85,10 @@ export default function Pedido({ carrito, drawerAbierto, setDrawerAbierto }) {
   // el producto que el cliente está armando en la ventana de opciones
   const [armando, setArmando] = useState(null)
 
+  // Si el local está cerrado se puede mirar la carta, pero no pedir: se avisa
+  // acá arriba para que nadie arme un pedido entero y se entere al final.
+  const { motivo, cerradoDelTodo } = useTienda(modalidad)
+
   const categorias = useMemo(() => {
     const q = normalizar(busqueda.trim())
     if (!q) return secciones
@@ -126,26 +131,22 @@ export default function Pedido({ carrito, drawerAbierto, setDrawerAbierto }) {
           </p>
         </div>
 
-        {/* controles tipo Fudo */}
-        <div className="mb-6 grid gap-3 sm:grid-cols-[auto_1fr]">
-          <div className="inline-flex rounded-full border border-white/15 p-1">
-            {[
-              { id: 'delivery', label: 'Delivery' },
-              { id: 'retiro', label: 'Para retirar' },
-            ].map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                onClick={() => setModalidad(m.id)}
-                className={`rounded-full px-5 py-2 text-xs font-extrabold uppercase tracking-widest transition-colors ${
-                  modalidad === m.id ? 'bg-amber text-ink' : 'text-ash hover:text-paper'
-                }`}
-              >
-                {m.label}
-              </button>
-            ))}
+        {cerradoDelTodo && (
+          <div
+            data-reveal
+            className="mb-6 rounded-2xl border border-flame/40 bg-flame/10 px-5 py-4"
+          >
+            <p className="display text-xl text-flame">Ahora estamos cerrados</p>
+            <p className="mt-1 text-sm text-ash">
+              {motivo} Mirá la carta tranquilo: el pedido lo vas a poder hacer cuando
+              abramos.
+            </p>
           </div>
+        )}
 
+        {/* Delivery o retiro se pregunta en el carrito, al lado del local:
+            las dos decisiones del pedido juntas y en el momento de confirmar. */}
+        <div className="mb-6">
           <label className="relative flex items-center">
             <svg
               viewBox="0 0 24 24"
@@ -217,7 +218,13 @@ export default function Pedido({ carrito, drawerAbierto, setDrawerAbierto }) {
           {/* carrito fijo en desktop */}
           <aside className="hidden lg:block">
             <div className="sticky top-28 max-h-[calc(100svh-8rem)]">
-              <Carrito carrito={carrito} modalidad={modalidad} localId={localId} onLocal={setLocalId} />
+              <Carrito
+                carrito={carrito}
+                modalidad={modalidad}
+                onModalidad={setModalidad}
+                localId={localId}
+                onLocal={setLocalId}
+              />
             </div>
           </aside>
         </div>
@@ -255,6 +262,7 @@ export default function Pedido({ carrito, drawerAbierto, setDrawerAbierto }) {
             <Carrito
               carrito={carrito}
               modalidad={modalidad}
+              onModalidad={setModalidad}
               localId={localId}
               onLocal={setLocalId}
               onCerrar={() => setDrawerAbierto(false)}

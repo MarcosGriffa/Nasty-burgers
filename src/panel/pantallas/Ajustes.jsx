@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useColeccion } from '../../lib/almacen'
 import { LOCALES } from '../../data/negocio'
-import { AJUSTES_INICIALES, ZONAS_ENVIO } from '../../data/semillas'
+import { AJUSTES_INICIALES } from '../../data/semillas'
 import { pesos } from '../../lib/utils'
 import { Boton, Encabezado, FilaKpis, Kpi, Tarjeta, Vacio } from '../comp/ui'
 import { imprimirComandaCocina, imprimirTicket } from '../../lib/imprimir'
@@ -155,49 +155,47 @@ export function TiendaHorarios() {
 
 // ---------------------------------------------------------- TIENDA: ENVÍOS
 export function TiendaEnvios() {
-  const { filas: zonas, crear, actualizar, eliminar } = useColeccion('zonas_envio', ZONAS_ENVIO)
+  const { a, guardar } = useAjustes()
+  const costo = Number(a.costo_envio) || 0
 
   return (
     <>
-      <Encabezado titulo="Costos de envío" bajada="Lo que se cobra por zona.">
-        <Boton variante="primario" onClick={() => crear({ zona: 'Nueva zona', hasta_km: 0, costo: 0 })}>
-          + Nueva zona
-        </Boton>
-      </Encabezado>
+      <Encabezado titulo="Costo de envío" bajada="Uno solo para todas las zonas." />
 
-      <Tarjeta>
-        {zonas.length === 0 ? (
-          <Vacio>Todavía no cargaste zonas de envío.</Vacio>
-        ) : (
-          <div className="space-y-2">
-            {zonas.map((z) => (
-              <div key={z.id} className="grid grid-cols-[1fr_100px_120px_auto] items-center gap-2">
-                <input
-                  value={z.zona}
-                  onChange={(e) => actualizar(z.id, { zona: e.target.value })}
-                  className="rounded-xl border border-white/15 bg-ink px-3 py-2 text-sm text-paper"
-                />
-                <input
-                  type="number"
-                  value={z.hasta_km}
-                  onChange={(e) => actualizar(z.id, { hasta_km: Number(e.target.value) })}
-                  className="rounded-xl border border-white/15 bg-ink px-3 py-2 text-right text-sm text-paper"
-                />
-                <input
-                  type="number"
-                  value={z.costo}
-                  onChange={(e) => actualizar(z.id, { costo: Number(e.target.value) })}
-                  className="rounded-xl border border-white/15 bg-ink px-3 py-2 text-right text-sm text-amber"
-                />
-                <Boton variante="peligro" onClick={() => eliminar(z.id)}>
-                  Borrar
-                </Boton>
-              </div>
-            ))}
-            <p className="pt-2 text-xs text-ash">Zona · hasta km · costo del envío</p>
+      <div className="grid gap-5 lg:grid-cols-2">
+        <Tarjeta titulo="Cuánto se cobra">
+          <Texto
+            label="Costo del envío"
+            tipo="number"
+            valor={a.costo_envio}
+            onChange={(v) => guardar({ costo_envio: v })}
+          />
+          <p className="mt-3 text-xs text-ash">
+            Se suma al total cuando el cliente elige delivery, sale en el WhatsApp
+            de confirmación y en el ticket. Si lo dejás en 0, el envío es gratis.
+          </p>
+        </Tarjeta>
+
+        <Tarjeta titulo="Así lo ve el cliente">
+          <div className="space-y-1 text-sm">
+            <div className="flex justify-between text-ash">
+              <span>Subtotal</span>
+              <span>{pesos(19400)}</span>
+            </div>
+            <div className="flex justify-between text-ash">
+              <span>Envío</span>
+              <span>{costo === 0 ? 'gratis' : pesos(costo)}</span>
+            </div>
+            <div className="flex items-baseline justify-between border-t border-white/10 pt-2">
+              <span className="text-paper">Total</span>
+              <span className="display text-xl text-amber">{pesos(19400 + costo)}</span>
+            </div>
           </div>
-        )}
-      </Tarjeta>
+          <p className="mt-4 text-xs text-ash">
+            Para retirar en el local no se cobra nada de esto.
+          </p>
+        </Tarjeta>
+      </div>
     </>
   )
 }

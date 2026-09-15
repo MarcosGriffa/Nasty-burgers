@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { LOCALES, NEGOCIO } from '../data/negocio'
+import { LOCALES } from '../data/negocio'
 import { nombreCompleto, pesos, soloDigitos } from '../lib/utils'
 import { crearPedido } from '../lib/pedidos'
+import { useTienda } from '../lib/tienda'
 import { precioConOpciones } from '../hooks/useCarrito'
 import { modoDemo } from '../lib/supabase'
 
@@ -9,6 +10,11 @@ const PAGOS = [
   { id: 'efectivo', label: 'Efectivo', nota: '10% OFF' },
   { id: 'transferencia', label: 'Transferencia' },
   { id: 'tarjeta', label: 'Tarjeta' },
+]
+
+const MODALIDADES = [
+  { id: 'delivery', label: 'Delivery', nota: 'Te lo llevamos' },
+  { id: 'retiro', label: 'Para retirar', nota: 'Lo buscás vos' },
 ]
 
 function Campo({ error, ...props }) {
@@ -22,7 +28,14 @@ function Campo({ error, ...props }) {
   )
 }
 
-export default function Carrito({ carrito, modalidad, localId, onLocal, onCerrar }) {
+export default function Carrito({
+  carrito,
+  modalidad,
+  onModalidad,
+  localId,
+  onLocal,
+  onCerrar,
+}) {
   const {
     lineas,
     agregar,
@@ -45,16 +58,28 @@ export default function Carrito({ carrito, modalidad, localId, onLocal, onCerrar
   const [confirmado, setConfirmado] = useState(null)
   const [error, setError] = useState(null)
 
+  // Horarios y costo de envío salen del panel: si el local está cerrado o
+  // pausado, acá no se puede confirmar nada.
+  const { abierto, motivo, cerradoDelTodo, costoEnvio, montoMinimo } = useTienda(modalidad)
+
   const local = LOCALES.find((l) => l.id === localId) ?? null
   const descuento = descuentoEfectivo(pago)
-  const total = subtotal - descuento
+  const envio = modalidad === 'delivery' ? costoEnvio : 0
+  const total = subtotal - descuento + envio
 
   const faltaNombre = nombre.trim().length < 2
   const faltaTelefono = soloDigitos(telefono).length < 8
   const faltaDireccion = modalidad === 'delivery' && direccion.trim().length < 5
   const faltaLocal = !local
+  const faltaMinimo = montoMinimo > 0 && subtotal < montoMinimo
   const listo =
-    unidades > 0 && !faltaLocal && !faltaNombre && !faltaTelefono && !faltaDireccion
+    unidades > 0 &&
+    abierto &&
+    !faltaMinimo &&
+    !faltaLocal &&
+    !faltaNombre &&
+    !faltaTelefono &&
+    !faltaDireccion
 
   const confirmar = async () => {
     if (!listo) {
@@ -81,6 +106,9 @@ export default function Carrito({ carrito, modalidad, localId, onLocal, onCerrar
         })),
         subtotal,
         descuento,
+        // se guarda en el pedido: si mañana sube el envío, los pedidos viejos
+        // tienen que seguir mostrando lo que se cobró de verdad
+        envio,
         total,
         pago,
       })
@@ -254,8 +282,42 @@ export default function Carrito({ carrito, modalidad, localId, onLocal, onCerrar
 
         {unidades > 0 && (
           <div className="mt-6 space-y-4">
-            {/* Lo primero que hay que decidir: de qué local sale. Cada uno tiene
-                su propia pantalla de comandas, así que el pedido va a uno solo. */}
+            {/* Las dos preguntas que definen el pedido van juntas y arriba de
+                todo: cómo lo querés y de qué local. Una al lado de la otra,
+                donde el cliente ya está decidiendo. */}
+            <div>
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-ash">
+                ¿Cómo lo querés?
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {MODALIDADES.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => onModalidad?.(m.id)}
+                    className={`rounded-xl border px-3 py-2.5 text-left transition-colors ${
+                      modalidad === m.id
+                        ? 'border-amber bg-amber text-ink'
+                        : 'border-white/15 text-paper hover:border-white/35'
+                    }`}
+                  >
+                    <span className="block text-xs font-bold">{m.label}</span>
+                    <span
+                      className={`block text-[10px] leading-tight ${
+                        modalidad === m.id ? 'text-ink/70' : 'text-ash'
+                      }`}
+                    >
+                      {m.id === 'delivery'
+                        ? costoEnvio > 0
+                          ? `+${pesos(costoEnvio)}`
+                          : 'sin cargo'
+                        : m.nota}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div>
               <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-ash">
                 {modalidad === 'delivery' ? '¿Desde qué local?' : '¿Dónde lo retirás?'}
@@ -369,9 +431,7 @@ export default function Carrito({ carrito, modalidad, localId, onLocal, onCerrar
         {modalidad === 'delivery' && (
           <div className="mb-1 flex justify-between text-sm text-ash">
             <span>Envío</span>
-            <span>
-              {NEGOCIO.costoEnvio == null ? 'a coordinar' : pesos(NEGOCIO.costoEnvio)}
-            </span>
+            <span>{envio === 0 ? 'sin cargo' : pesos(envio)}</span>
           </div>
         )}
         <div className="mb-4 flex items-baseline justify-between">
@@ -379,28 +439,45 @@ export default function Carrito({ carrito, modalidad, localId, onLocal, onCerrar
           <span className="display text-2xl text-amber">{pesos(total)}</span>
         </div>
 
+        {/* Con el local cerrado no se toma el pedido. Se dice acá, arriba del
+            botón, y se dice cuándo se puede. */}
+        {!abierto && (
+          <p className="mb-3 rounded-xl border border-flame/40 bg-flame/10 px-4 py-3 text-center text-xs leading-relaxed text-flame">
+            {motivo}
+            {!cerradoDelTodo && (
+              <span className="mt-1 block text-ash">
+                {modalidad === 'delivery'
+                  ? 'Para retirar sí estamos abiertos.'
+                  : 'El delivery sí está abierto.'}
+              </span>
+            )}
+          </p>
+        )}
+
         <button
           type="button"
           onClick={confirmar}
-          disabled={enviando}
+          disabled={enviando || !abierto}
           className={`w-full rounded-full px-6 py-4 text-sm font-extrabold uppercase tracking-widest transition-transform ${
             listo && !enviando
               ? 'bg-amber text-ink hover:scale-[1.02]'
               : 'cursor-not-allowed bg-white/10 text-ash'
           }`}
         >
-          {enviando ? 'Enviando…' : 'Confirmar pedido'}
+          {enviando ? 'Enviando…' : abierto ? 'Confirmar pedido' : 'Cerrado por ahora'}
         </button>
 
-        {intento && !listo && unidades > 0 && (
+        {intento && !listo && unidades > 0 && abierto && (
           <p className="mt-2 text-center text-xs text-flame">
-            {faltaLocal
-              ? 'Elegí de qué local lo querés.'
-              : faltaNombre
-                ? 'Escribí tu nombre.'
-                : faltaTelefono
-                  ? 'Falta el teléfono.'
-                  : 'Escribí la dirección de entrega.'}
+            {faltaMinimo
+              ? `El pedido mínimo es de ${pesos(montoMinimo)}.`
+              : faltaLocal
+                ? 'Elegí de qué local lo querés.'
+                : faltaNombre
+                  ? 'Escribí tu nombre.'
+                  : faltaTelefono
+                    ? 'Falta el teléfono.'
+                    : 'Escribí la dirección de entrega.'}
           </p>
         )}
         {error && <p className="mt-2 text-center text-xs text-flame">{error}</p>}

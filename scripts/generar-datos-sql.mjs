@@ -52,7 +52,6 @@ const TABLAS = [
   ['impresoras', S.IMPRESORAS, 'Impresoras'],
   ['listas_precios', S.LISTAS_PRECIOS, 'Listas de precios'],
   ['menus', S.MENUS, 'Menús'],
-  ['zonas_envio', S.ZONAS_ENVIO, 'Zonas de envío'],
   ['ajustes', S.AJUSTES_INICIALES, 'Ajustes del local'],
 ]
 

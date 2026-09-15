@@ -135,9 +135,9 @@ insert into public.productos (codigo, nombre, categoria, subcategoria, area, rec
 delete from public.grupos_modificadores;
 insert into public.grupos_modificadores (nombre, bajada, minimo, maximo, opciones) values
   ('Papas', 'Todas las burgas vienen con papas. Elegí cómo las querés.', 1, 1, '[{"nombre":"Papas normales","precio":0},{"nombre":"Papas sazonadas","precio":0,"ingrediente":"Sazonado Nasty","cantidad":8}]'::jsonb),
-  ('Punto de la carne', 'Por defecto va a punto.', 0, 1, '[{"nombre":"A punto","precio":0},{"nombre":"Bien cocida","precio":0}]'::jsonb),
-  ('Extras', 'Para el que quiere más.', 0, 4, '[{"nombre":"Bacon","precio":1500,"ingrediente":"Bacon","cantidad":30},{"nombre":"Cheddar x2","precio":1500,"ingrediente":"Cheddar en fetas","cantidad":2},{"nombre":"Medallón + cheddar","precio":4700,"ingrediente":"Medallón 120 g","cantidad":1},{"nombre":"Cebolla crispy","precio":1200,"ingrediente":"Cebolla crispy","cantidad":20}]'::jsonb),
-  ('Sin qué', 'Lo que no quiere el cliente.', 0, 5, '[{"nombre":"Sin cebolla","precio":0},{"nombre":"Sin pepinillos","precio":0},{"nombre":"Sin tomate","precio":0},{"nombre":"Sin mayonesa","precio":0},{"nombre":"Sin ketchup","precio":0}]'::jsonb);
+  ('Punto de la carne', 'Si no elegís, sale a punto.', 0, 1, '[{"nombre":"A punto","precio":0},{"nombre":"Bien cocida","precio":0}]'::jsonb),
+  ('Extras', 'Sumale lo que quieras.', 0, 4, '[{"nombre":"Bacon","precio":1500,"ingrediente":"Bacon","cantidad":30},{"nombre":"Cheddar x2","precio":1500,"ingrediente":"Cheddar en fetas","cantidad":2},{"nombre":"Medallón + cheddar","precio":4700,"ingrediente":"Medallón 120 g","cantidad":1},{"nombre":"Cebolla crispy","precio":1200,"ingrediente":"Cebolla crispy","cantidad":20}]'::jsonb),
+  ('Sin qué', 'Si hay algo que no te va, marcalo.', 0, 5, '[{"nombre":"Sin cebolla","precio":0},{"nombre":"Sin pepinillos","precio":0},{"nombre":"Sin tomate","precio":0},{"nombre":"Sin mayonesa","precio":0},{"nombre":"Sin ketchup","precio":0}]'::jsonb);
 
 -- Proveedores ---------------------------------------------------------------
 delete from public.proveedores;
@@ -234,14 +234,7 @@ delete from public.menus;
 insert into public.menus (nombre, canal, productos, estado) values
   ('Menu Tienda Online', 'Tienda Online', 46, 'Publicado');
 
--- Zonas de envío ------------------------------------------------------------
-delete from public.zonas_envio;
-insert into public.zonas_envio (zona, hasta_km, costo) values
-  ('Benavídez centro', 3, 1500),
-  ('Benavídez resto', 6, 2500),
-  ('Nordelta / Garín', 10, 3800);
-
 -- Ajustes del local ---------------------------------------------------------
 delete from public.ajustes;
-insert into public.ajustes (clave, tienda_activa, telefono, whatsapp, email, direccion, horario, instagram, facebook, monto_minimo_activo, monto_minimo, ocultar_sin_stock, alertas_sonoras, imprimir_al_aceptar, imprimir_ticket_al_entregar, rechazar_sin_stock, copias_cocina, ancho_papel, py_activo, py_codigo, py_comision, py_auto_aceptar, py_sonido, horarios) values
-  ('general', true, '541140940880', '541140940880', 'nastyburgersbenavidez@gmail.com', 'Av. Alvear 3041', '19:30 - 23:00', 'https://instagram.com/nastyburgersarg', null, false, 0, true, true, true, false, false, 1, '80mm', false, '468828', 0, false, true, '[{"dia":"Lun","delivery":false,"retiro":false,"desde":"19:30","hasta":"23:00"},{"dia":"Mar","delivery":false,"retiro":false,"desde":"19:30","hasta":"23:00"},{"dia":"Mié","delivery":true,"retiro":true,"desde":"19:30","hasta":"23:00"},{"dia":"Jue","delivery":true,"retiro":true,"desde":"19:30","hasta":"23:00"},{"dia":"Vie","delivery":true,"retiro":true,"desde":"19:30","hasta":"23:00"},{"dia":"Sáb","delivery":true,"retiro":true,"desde":"19:30","hasta":"23:00"},{"dia":"Dom","delivery":true,"retiro":true,"desde":"19:30","hasta":"23:00"}]'::jsonb);
+insert into public.ajustes (clave, tienda_activa, telefono, whatsapp, email, direccion, horario, instagram, facebook, monto_minimo_activo, monto_minimo, costo_envio, ocultar_sin_stock, alertas_sonoras, imprimir_al_aceptar, imprimir_ticket_al_entregar, rechazar_sin_stock, copias_cocina, ancho_papel, py_activo, py_codigo, py_comision, py_auto_aceptar, py_sonido, horarios) values
+  ('general', true, '541140940880', '541140940880', 'nastyburgersbenavidez@gmail.com', 'Av. Alvear 3041', '19:30 - 23:00', 'https://instagram.com/nastyburgersarg', null, false, 0, 3000, true, true, true, false, false, 1, '80mm', false, '468828', 0, false, true, '[{"dia":"Lun","delivery":false,"retiro":false,"desde":"19:30","hasta":"23:00"},{"dia":"Mar","delivery":false,"retiro":false,"desde":"19:30","hasta":"23:00"},{"dia":"Mié","delivery":true,"retiro":true,"desde":"19:30","hasta":"23:00"},{"dia":"Jue","delivery":true,"retiro":true,"desde":"19:30","hasta":"23:00"},{"dia":"Vie","delivery":true,"retiro":true,"desde":"19:30","hasta":"23:00"},{"dia":"Sáb","delivery":true,"retiro":true,"desde":"19:30","hasta":"23:00"},{"dia":"Dom","delivery":true,"retiro":true,"desde":"19:30","hasta":"23:00"}]'::jsonb);

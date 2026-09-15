@@ -160,6 +160,7 @@ export default function Comanda({ pedido, onAceptar, onRechazar, onAvanzar, onCo
       <div className="mt-3 flex items-baseline justify-between border-t border-white/10 pt-3">
         <span className="text-xs uppercase tracking-widest text-ash">
           {pedido.pago}
+          {pedido.envio > 0 ? ` · envío ${pesos(pedido.envio)}` : ''}
           {pedido.demora_min ? ` · ${pedido.demora_min}′ estimados` : ''}
         </span>
         <span className="display text-2xl text-amber">{pesos(pedido.total)}</span>

@@ -10,7 +10,8 @@ export const NEGOCIO = {
   email: 'nastyburgersbenavidez@gmail.com',
   instagram: 'nastyburgersarg',
   promoEfectivo: 0.1, // 10% OFF abonando en efectivo
-  costoEnvio: null, // null = "a coordinar". Si pones un numero, se suma al total.
+  // El costo del envio NO esta aca: se edita en el panel (Tienda > Envios) y
+  // lo lee src/lib/tienda.js, para que se pueda cambiar sin tocar el codigo.
 }
 
 export const LOCALES = [
