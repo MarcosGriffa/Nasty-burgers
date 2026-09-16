@@ -100,8 +100,24 @@ export function Modal({ titulo, bajada, onCerrar, children, ancho = 'max-w-lg' }
 const claseInput =
   'w-full rounded-xl border border-white/15 bg-ink px-4 py-3 text-sm text-paper placeholder:text-ash/70 focus:outline-none focus:ring-2 focus:ring-amber'
 
+// Las opciones de un select se declaran como strings sueltos ('Efectivo',
+// 'Tarjeta'...), pero a veces lo que se guarda no es lo que se muestra —el medio
+// de pago guarda 'mercadopago' y en pantalla dice "Mercado Pago"—. Para esos
+// casos se admite también { v, label }.
+export function opcionesDe(campo) {
+  const crudas = typeof campo.opciones === 'function' ? campo.opciones() : campo.opciones
+  return (crudas ?? []).map((o) => (typeof o === 'object' && o !== null ? o : { v: o, label: o }))
+}
+
+/** Lo que hay que mostrar de un valor guardado. Para todo lo que no es select,
+ *  es el valor tal cual. */
+export const etiquetaDeOpcion = (campo, valor) =>
+  campo.tipo === 'select'
+    ? (opcionesDe(campo).find((o) => o.v === valor)?.label ?? valor)
+    : valor
+
 export function Campo({ campo, valor, onChange }) {
-  const opciones = typeof campo.opciones === 'function' ? campo.opciones() : campo.opciones
+  const opciones = opcionesDe(campo)
 
   if (campo.tipo === 'bool') {
     return (
@@ -126,9 +142,9 @@ export function Campo({ campo, valor, onChange }) {
       {campo.tipo === 'select' ? (
         <select value={valor ?? ''} onChange={(e) => onChange(e.target.value)} className={claseInput}>
           <option value="">—</option>
-          {opciones?.map((o) => (
-            <option key={o} value={o}>
-              {o}
+          {opciones.map((o) => (
+            <option key={o.v} value={o.v}>
+              {o.label}
             </option>
           ))}
         </select>

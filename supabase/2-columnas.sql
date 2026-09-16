@@ -139,9 +139,13 @@ alter table public.descuentos
   add column if not exists valor  numeric default 0,
   add column if not exists activo boolean default true;
 
+-- `clave` engancha el medio con la forma de pago que trae el pedido
+-- (efectivo | mercadopago | transferencia | tarjeta). Va por clave y no por
+-- nombre para que renombrar el medio en el panel no corte la comisión.
 alter table public.medios_pago
   add column if not exists nombre   text,
   add column if not exists tipo     text,
+  add column if not exists clave    text,
   add column if not exists comision numeric default 0,
   add column if not exists activo   boolean default true;
 

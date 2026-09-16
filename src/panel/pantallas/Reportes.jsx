@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useColeccion } from '../../lib/almacen'
 import * as E from '../../lib/estadisticas'
-import { PRODUCTOS, GASTOS } from '../../data/semillas'
+import { PRODUCTOS, GASTOS, MEDIOS_PAGO } from '../../data/semillas'
+import { comisiones } from '../../lib/cobros'
 import { LOCALES } from '../../data/negocio'
 import { aCSV, descargar, pesos } from '../../lib/utils'
 import { Barras, BarrasH, ConTabla, SERIE } from '../comp/graficos'
@@ -353,6 +354,7 @@ export function EstadoResultados({ ctrl }) {
   const f = usePeriodo('90')
   const { filas: gastos } = useColeccion('gastos', GASTOS)
   const { filas: productos } = useColeccion('productos', PRODUCTOS)
+  const { filas: medios } = useColeccion('medios_pago', MEDIOS_PAGO)
 
   const pedidos = useMemo(() => E.filtrar(ctrl.pedidos, { dias: f.dias }), [ctrl.pedidos, f.dias])
   const gastosPeriodo = useMemo(() => {
@@ -360,7 +362,7 @@ export function EstadoResultados({ ctrl }) {
     return gastos.filter((g) => new Date(g.fecha).getTime() >= desde)
   }, [gastos, f.dias])
 
-  const r = E.estadoResultados(pedidos, gastosPeriodo, productos)
+  const r = E.estadoResultados(pedidos, gastosPeriodo, productos, medios)
 
   const filas = [
     ['(+) Ventas brutas', r.brutas, true],
@@ -369,6 +371,9 @@ export function EstadoResultados({ ctrl }) {
     ['(−) Costo de mercadería vendida', -r.cmv],
     ['(=) Ganancia bruta', r.gananciaBruta, true],
     ['(−) Gastos', -r.gastos],
+    // La comisión del medio de pago nunca llega a la caja: va acá abajo, con
+    // los gastos, y no arriba en la ganancia bruta.
+    ['(−) Comisiones de medios de pago', -r.comisiones],
     ['(=) Ganancia neta', r.gananciaNeta, true],
   ]
 
@@ -405,6 +410,14 @@ export function EstadoResultados({ ctrl }) {
             ))}
           </tbody>
         </table>
+
+        {r.comisionesSinAsignar.length > 0 && (
+          <p className="mt-3 text-xs text-ash">
+            Ojo: las ventas con <b>{r.comisionesSinAsignar.join(' y ')}</b> no tienen un medio de pago
+            asignado, así que su comisión no está descontada acá y la ganancia neta queda un poco
+            arriba de la real. Se asigna en Configuración → Medios de Pago.
+          </p>
+        )}
       </Tarjeta>
     </>
   )
@@ -477,12 +490,13 @@ export function CuentasCobrar({ ctrl }) {
       p.pago === 'efectivo' &&
       !p.efectivo_cobrado,
   )
-  const online = E.filtrar(ctrl.pedidos, { dias: 30 }).filter((p) => p.pago === 'mercadopago')
-  const comision = Math.round(online.reduce((a, p) => a + (p.total || 0), 0) * 0.035)
+  const { filas: medios } = useColeccion('medios_pago', MEDIOS_PAGO)
+  const delMes = useMemo(() => E.filtrar(ctrl.pedidos, { dias: 30 }), [ctrl.pedidos])
+  const cob = useMemo(() => comisiones(delMes, medios), [delMes, medios])
 
   return (
     <>
-      <Encabezado titulo="Cuentas a cobrar" bajada="Efectivo sin rendir y acreditaciones de Mercado Pago." />
+      <Encabezado titulo="Cuentas a cobrar" bajada="Efectivo sin rendir y lo que se llevan los medios de pago." />
 
       <FilaKpis cols={3}>
         <Kpi label="Efectivo sin contar" valor={pendientes.length} tono={pendientes.length ? 'flame' : undefined} />
@@ -490,8 +504,66 @@ export function CuentasCobrar({ ctrl }) {
           label="Monto sin rendir"
           valor={pesos(pendientes.reduce((a, p) => a + (p.total || 0), 0))}
         />
-        <Kpi label="Comisiones Mercado Pago (30 d)" valor={pesos(comision)} detalle="estimado 3,5%" />
+        <Kpi
+          label="Comisiones (30 d)"
+          valor={pesos(cob.total)}
+          detalle="según Configuración → Medios de Pago"
+        />
       </FilaKpis>
+
+      <Tarjeta titulo="Qué se lleva cada medio de pago (30 días)">
+        {cob.filas.length === 0 ? (
+          <Vacio>Todavía no hay ventas en el período.</Vacio>
+        ) : (
+          <>
+            {cob.sinAsignar.length > 0 && (
+              // Preferimos decir "no lo sé" antes que estimar un arancel: una
+              // comisión inventada ensucia la ganancia neta y nadie se entera.
+              <p className="mb-3 rounded-xl border border-flame/40 bg-flame/10 px-4 py-3 text-xs text-paper">
+                <b>{cob.sinAsignar.join(' y ')}</b> {cob.sinAsignar.length > 1 ? 'no tienen' : 'no tiene'} un
+                medio de pago asignado, así que {pesos(cob.brutoSinAsignar)} figuran sin comisión. Se
+                arregla en Configuración → Medios de Pago, con el campo «Cobra los pedidos pagados con».
+              </p>
+            )}
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/10 text-[11px] uppercase tracking-widest text-ash">
+                  <th className="px-3 py-2 text-left font-bold">Medio</th>
+                  <th className="px-3 py-2 text-right font-bold">Vendido</th>
+                  <th className="px-3 py-2 text-right font-bold">Arancel</th>
+                  <th className="px-3 py-2 text-right font-bold">Comisión</th>
+                  <th className="px-3 py-2 text-right font-bold">Neto</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cob.filas.map((f) => (
+                  <tr key={f.clave} className="border-b border-white/5">
+                    <td className="px-3 py-2.5 font-bold text-paper">
+                      {f.label}
+                      <span className="block text-[11px] font-semibold text-ash">
+                        {f.cantidad} {f.cantidad === 1 ? 'pedido' : 'pedidos'}
+                        {f.medio && f.medio !== f.label ? ` · ${f.medio}` : ''}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2.5 text-right tabular-nums text-paper">{pesos(f.bruto)}</td>
+                    <td className="px-3 py-2.5 text-right text-xs tabular-nums text-ash">
+                      {f.sinAsignar ? 'sin asignar' : `${f.porcentaje.toLocaleString('es-AR')} %`}
+                    </td>
+                    <td
+                      className={`px-3 py-2.5 text-right tabular-nums ${
+                        f.sinAsignar ? 'text-flame' : 'text-ash'
+                      }`}
+                    >
+                      {f.sinAsignar ? '?' : pesos(f.comision ? -f.comision : 0)}
+                    </td>
+                    <td className="px-3 py-2.5 text-right tabular-nums text-amber">{pesos(f.neto)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
+      </Tarjeta>
 
       <Tarjeta titulo="Pedidos en efectivo sin contar">
         {pendientes.length === 0 ? (

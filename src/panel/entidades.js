@@ -1,4 +1,5 @@
 import * as S from '../data/semillas'
+import { CLAVES_PAGO } from '../lib/cobros'
 
 // ---------------------------------------------------------------------------
 // Definición de las pantallas de ABM. Cada una declara columnas y campos, y
@@ -280,12 +281,24 @@ export const ENTIDADES = {
     columnas: [
       { k: 'nombre', label: 'Nombre', principal: true },
       { k: 'tipo', label: 'Tipo' },
+      {
+        k: 'clave',
+        label: 'Cobra en',
+        calc: (f) => CLAVES_PAGO.find((p) => p.clave === f.clave)?.label ?? '— sin asignar',
+      },
       { k: 'comision', label: 'Comisión %', num: true },
       { k: 'activo', label: 'Activo', tipo: 'bool' },
     ],
     campos: [
       t('nombre', 'Nombre', { requerido: true }),
       sel('tipo', 'Tipo', ['Efectivo', 'Tarjeta', 'Online', 'Bancario']),
+      // Sin esto la comisión queda decorativa: es lo que le dice al panel a qué
+      // pedidos aplicarle este arancel.
+      sel(
+        'clave',
+        'Cobra los pedidos pagados con',
+        CLAVES_PAGO.map((p) => ({ v: p.clave, label: p.label })),
+      ),
       n('comision', 'Comisión %'),
       b('activo', 'Activo'),
     ],

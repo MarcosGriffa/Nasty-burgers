@@ -32,7 +32,7 @@ import { pesos } from './utils'
 const linea = (etiqueta, valor) => `${etiqueta}: ${valor}`
 const dia = (d) => new Date(d).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })
 
-function bloqueVentas(pedidos, productos, gastos, dias, titulo) {
+function bloqueVentas(pedidos, productos, gastos, medios, dias, titulo) {
   const delPeriodo = filtrar(pedidos, { dias })
   const r = resumen(delPeriodo)
   if (!r.cantidad) return `${titulo}: sin ventas registradas.`
@@ -40,7 +40,7 @@ function bloqueVentas(pedidos, productos, gastos, dias, titulo) {
   // los gastos tienen 'fecha', no 'creado_en': se filtran acá
   const desde = new Date(Date.now() - (dias - 1) * 86400000)
   const gastosDel = gastos.filter((g) => new Date(g.fecha || g.creado_en) >= desde)
-  const pyl = estadoResultados(delPeriodo, gastosDel, productos)
+  const pyl = estadoResultados(delPeriodo, gastosDel, productos, medios)
   const top = rankingProductos(delPeriodo, productos).slice(0, 8)
 
   return [
@@ -52,6 +52,12 @@ function bloqueVentas(pedidos, productos, gastos, dias, titulo) {
     linea('  Ticket promedio', pesos(r.promedio)),
     linea('  Costo de la mercadería (CMV)', `${pesos(pyl.cmv)} (${pyl.netas ? Math.round((pyl.cmv / pyl.netas) * 100) : 0}%)`),
     linea('  Gastos cargados', pesos(pyl.gastos)),
+    linea(
+      '  Comisiones de medios de pago',
+      pyl.comisionesSinAsignar.length
+        ? `${pesos(pyl.comisiones)} (INCOMPLETO: ${pyl.comisionesSinAsignar.join(' y ')} sin medio de pago asignado)`
+        : pesos(pyl.comisiones),
+    ),
     linea('  Ganancia bruta', `${pesos(pyl.gananciaBruta)} (margen ${pyl.margenBruto}%)`),
     linea('  Ganancia neta', `${pesos(pyl.gananciaNeta)} (margen ${pyl.margenNeto}%)`),
     '  Más vendidos:',
@@ -62,7 +68,14 @@ function bloqueVentas(pedidos, productos, gastos, dias, titulo) {
   ].join('\n')
 }
 
-export function contextoDelNegocio({ pedidos = [], productos = [], ingredientes = [], gastos = [], local } = {}) {
+export function contextoDelNegocio({
+  pedidos = [],
+  productos = [],
+  ingredientes = [],
+  gastos = [],
+  medios = [],
+  local,
+} = {}) {
   const hoy = filtrar(pedidos, { dias: 1 })
   const mes = filtrar(pedidos, { dias: 30 })
   const nombreLocal = LOCALES.find((l) => l.id === local)?.nombre
@@ -112,9 +125,9 @@ export function contextoDelNegocio({ pedidos = [], productos = [], ingredientes 
     '',
     `HOY: ${hoy.length} pedidos, ${pesos(resumen(hoy).netas)} netos.`,
     '',
-    bloqueVentas(pedidos, productos, gastos, 7, 'ÚLTIMA SEMANA'),
+    bloqueVentas(pedidos, productos, gastos, medios, 7, 'ÚLTIMA SEMANA'),
     '',
-    bloqueVentas(pedidos, productos, gastos, 30, 'ÚLTIMOS 30 DÍAS'),
+    bloqueVentas(pedidos, productos, gastos, medios, 30, 'ÚLTIMOS 30 DÍAS'),
     '',
     'CUÁNDO SE VENDE (últimos 30 días)',
     `  Por hora: ${horas.join(', ') || 'sin datos'}`,

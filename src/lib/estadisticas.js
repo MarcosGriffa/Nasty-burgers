@@ -2,6 +2,7 @@
 // los pedidos reales, no hay números escritos a mano en las pantallas.
 
 import { CATEGORIAS } from '../data/negocio'
+import { comisiones, etiquetaPago } from './cobros'
 
 const NOMBRE_CAT = Object.fromEntries(CATEGORIAS.map((c) => [c.id, c.nombre]))
 
@@ -174,17 +175,10 @@ export function porCategoria(pedidos) {
     .sort((a, b) => b.valor - a.valor)
 }
 
-const NOMBRE_PAGO = {
-  efectivo: 'Efectivo',
-  mercadopago: 'Mercado Pago',
-  transferencia: 'Transferencia',
-  tarjeta: 'Tarjeta',
-}
-
 export function porMedioDePago(pedidos) {
   const mapa = new Map()
   pedidos.forEach((p) => {
-    const k = NOMBRE_PAGO[p.pago] ?? p.pago ?? 'Otro'
+    const k = etiquetaPago(p.pago)
     mapa.set(k, (mapa.get(k) || 0) + (p.total || 0))
   })
   return [...mapa.entries()].map(([label, valor]) => ({ label, valor })).sort((a, b) => b.valor - a.valor)
@@ -209,20 +203,29 @@ export function porOrigen(pedidos) {
 }
 
 /** Estado de resultados: ventas, CMV, gastos y ganancia. */
-export function estadoResultados(pedidos, gastos, productos) {
+/**
+ * `medios` son los medios de pago configurados. Sin ellos la comisión da cero y
+ * la ganancia neta queda inflada: lo que se lleva Mercado Pago o la tarjeta
+ * nunca entró a la caja, así que es un gasto de venta como cualquier otro.
+ */
+export function estadoResultados(pedidos, gastos, productos, medios = []) {
   const r = resumen(pedidos)
   const ranking = rankingProductos(pedidos, productos)
   const cmv = ranking.reduce((a, p) => a + p.costo, 0)
   const gastoTotal = gastos.reduce((a, g) => a + (Number(g.importe) || 0), 0)
+  const cob = comisiones(pedidos, medios)
   const brutaGanancia = r.netas - cmv
+  const neta = brutaGanancia - gastoTotal - cob.total
   return {
     ...r,
     cmv,
     gastos: gastoTotal,
+    comisiones: cob.total,
+    comisionesSinAsignar: cob.sinAsignar,
     gananciaBruta: brutaGanancia,
-    gananciaNeta: brutaGanancia - gastoTotal,
+    gananciaNeta: neta,
     margenBruto: r.netas ? Math.round((brutaGanancia / r.netas) * 1000) / 10 : 0,
-    margenNeto: r.netas ? Math.round(((brutaGanancia - gastoTotal) / r.netas) * 1000) / 10 : 0,
+    margenNeto: r.netas ? Math.round((neta / r.netas) * 1000) / 10 : 0,
   }
 }
 

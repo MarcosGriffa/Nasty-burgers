@@ -3,7 +3,7 @@ import { useColeccion } from '../../lib/almacen'
 import { ENTIDADES } from '../entidades'
 import { aCSV, descargar, normalizar, pesos } from '../../lib/utils'
 import Tabla, { valorCelda } from '../comp/Tabla'
-import { Boton, Buscador, Campo, Chip, Encabezado, Modal } from '../comp/ui'
+import { Boton, Buscador, Campo, Chip, Encabezado, etiquetaDeOpcion, Modal } from '../comp/ui'
 import EditorProducto from './EditorProducto'
 import EditorModificador from './EditorModificador'
 
@@ -84,7 +84,9 @@ function Detalle({ def, fila, conteo, onEditar, onEliminar, onCerrar }) {
                   : 'No'
                 : c.tipo === 'moneda'
                   ? pesos(fila[c.k] || 0)
-                  : fila[c.k] || '—'}
+                  : // un select puede guardar un código y mostrar otra cosa
+                    // ('mercadopago' → "Mercado Pago"): acá va lo que se lee
+                    etiquetaDeOpcion(c, fila[c.k]) || '—'}
             </dd>
           </div>
         ))}

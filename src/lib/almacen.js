@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { modoDemo, supabase } from './supabase'
+import { normalizar } from './utils'
 
 /**
  * Almacén genérico de colecciones.
@@ -210,12 +211,47 @@ function ponerAlDiaGrupos(semilla) {
   )
 }
 
+/**
+ * Los medios de pago ya sembrados no tienen el campo `clave`, que es lo que
+ * engancha el arancel con la forma de pago del pedido. Sin él la comisión
+ * quedaría en cero para todos y el panel diría "sin asignar" en una instalación
+ * que en realidad ya estaba bien configurada.
+ *
+ * Se completa una sola vez, cruzando por nombre. Es lo único razonable acá: la
+ * fila vieja no tiene otra cosa con qué identificarse. De ahí en más manda la
+ * clave, y renombrar el medio en el panel ya no rompe nada.
+ */
+const CLAVE_POR_NOMBRE = {
+  efectivo: 'efectivo',
+  mercadopago: 'mercadopago',
+  transferencia: 'transferencia',
+}
+
+// "Mercado Pago", "mercado pago" y "MercadoPago" son el mismo medio
+const aClave = (s) => normalizar(String(s || '')).replace(/[^a-z0-9]/g, '')
+
+function ponerAlDiaMediosPago() {
+  const actuales = leer('medios_pago')
+  if (!actuales.length) return
+  let cambio = false
+  const nuevos = actuales.map((medio) => {
+    if (medio.clave !== undefined) return medio
+    const clave = CLAVE_POR_NOMBRE[aClave(medio.nombre)] ?? ''
+    cambio = true
+    return { ...medio, clave }
+  })
+  if (cambio) escribir('medios_pago', nuevos)
+}
+
+const AL_DIA = ['productos', 'ingredientes', 'grupos_modificadores', 'medios_pago']
+
 function ponerAlDia(nombre, semilla) {
-  if (!['productos', 'ingredientes', 'grupos_modificadores'].includes(nombre)) return
+  if (!AL_DIA.includes(nombre)) return
   if (yaCorrio(nombre)) return
   // los ingredientes se renombran primero: las recetas nuevas ya los nombran así
   if (nombre === 'ingredientes') ponerAlDiaIngredientes(semilla)
   else if (nombre === 'grupos_modificadores') ponerAlDiaGrupos(semilla)
+  else if (nombre === 'medios_pago') ponerAlDiaMediosPago()
   else ponerAlDiaProductos(semilla)
   marcarCorrido(nombre)
 }

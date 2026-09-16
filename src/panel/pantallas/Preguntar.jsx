@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useColeccion } from '../../lib/almacen'
-import { PRODUCTOS, INGREDIENTES, GASTOS } from '../../data/semillas'
+import { PRODUCTOS, INGREDIENTES, GASTOS, MEDIOS_PAGO } from '../../data/semillas'
 import { contextoDelNegocio } from '../../lib/contexto'
 import { hayIA, preguntarAGemini } from '../../lib/ia'
 import { Boton, Encabezado, Tarjeta } from '../comp/ui'
@@ -50,6 +50,7 @@ export default function Preguntar({ ctrl }) {
   const { filas: productos } = useColeccion('productos', PRODUCTOS)
   const { filas: ingredientes } = useColeccion('ingredientes', INGREDIENTES)
   const { filas: gastos } = useColeccion('gastos', GASTOS)
+  const { filas: medios } = useColeccion('medios_pago', MEDIOS_PAGO)
 
   const [charla, setCharla] = useState([])
   const [texto, setTexto] = useState('')
@@ -76,6 +77,7 @@ export default function Preguntar({ ctrl }) {
         productos,
         ingredientes,
         gastos,
+        medios,
         local: ctrl.local,
       })
       const respuesta = await preguntarAGemini({

@@ -315,12 +315,20 @@ export const DESCUENTOS = [
   { nombre: 'Clientes', tipo: 'Porcentaje', valor: 15, activo: true },
 ]
 
+// `clave` es lo que engancha el medio de pago con la forma de pago que trae el
+// pedido. Se hace por clave y no por nombre para que renombrarlo en el panel no
+// rompa el cálculo de la comisión.
+//
+// Las dos tarjetas quedan SIN clave a propósito: el pedido solo dice "tarjeta",
+// no si fue débito o crédito, y son aranceles distintos. Poner una de las dos
+// sería inventar plata. Hasta que se defina, el panel avisa que las ventas con
+// tarjeta no tienen comisión asignada.
 export const MEDIOS_PAGO = [
-  { nombre: 'Efectivo', tipo: 'Efectivo', comision: 0, activo: true },
-  { nombre: 'Mercado Pago', tipo: 'Online', comision: 3.5, activo: true },
-  { nombre: 'Transferencia', tipo: 'Bancario', comision: 0, activo: true },
-  { nombre: 'Tarjeta Débito', tipo: 'Tarjeta', comision: 1.8, activo: true },
-  { nombre: 'Tarjeta Crédito', tipo: 'Tarjeta', comision: 3.2, activo: true },
+  { nombre: 'Efectivo', tipo: 'Efectivo', clave: 'efectivo', comision: 0, activo: true },
+  { nombre: 'Mercado Pago', tipo: 'Online', clave: 'mercadopago', comision: 3.5, activo: true },
+  { nombre: 'Transferencia', tipo: 'Bancario', clave: 'transferencia', comision: 0, activo: true },
+  { nombre: 'Tarjeta Débito', tipo: 'Tarjeta', clave: '', comision: 1.8, activo: true },
+  { nombre: 'Tarjeta Crédito', tipo: 'Tarjeta', clave: '', comision: 3.2, activo: true },
 ]
 
 export const CAJAS = [{ nombre: 'Principal', activa: true }]
