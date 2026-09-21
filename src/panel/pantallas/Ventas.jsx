@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { LOCALES, NEGOCIO } from '../../data/negocio'
 import { useMenuPublico } from '../../lib/menu'
 import { crearPedido, ESTADOS } from '../../lib/pedidos'
+import { useTienda } from '../../lib/tienda'
 import { hora, minutosDesde, pesos } from '../../lib/utils'
 import { imprimirComandaCocina, imprimirTicket } from '../../lib/imprimir'
 import Comanda from '../Comanda'
@@ -27,6 +28,17 @@ function NuevoPedido({ modalidad, onCerrar }) {
     const base = todos.map((i) => ({ ...i, etiqueta: i.nombre }))
     return q ? base.filter((i) => i.etiqueta.toLowerCase().includes(q)) : base.slice(0, 14)
   }, [busqueda, todos])
+
+  // El envío sale de la misma tabla que lee la web (Tienda → Costos de envío),
+  // y no de un número escrito acá: si el local lo cambia en el panel, tiene que
+  // cambiar en los dos lados el mismo día.
+  //
+  // Por qué importa: hasta ahora el mostrador no lo cobraba. El mismo pedido
+  // salía $3.000 más barato por teléfono que por la web, el repartidor iba
+  // igual, y esa diferencia no figuraba en ningún lado —ni en el ticket, ni en
+  // la caja, ni en el reporte— porque el pedido se guardaba sin la línea.
+  const { costoEnvio } = useTienda(modalidad)
+  const envio = modalidad === 'delivery' ? costoEnvio : 0
 
   const agregar = (i) =>
     setItems((prev) => {
@@ -54,7 +66,8 @@ function NuevoPedido({ modalidad, onCerrar }) {
       items,
       subtotal,
       descuento,
-      total: subtotal - descuento,
+      envio,
+      total: subtotal - descuento + envio,
       pago,
       origen: 'Mostrador',
     })
@@ -149,11 +162,18 @@ function NuevoPedido({ modalidad, onCerrar }) {
             </div>
           </div>
 
+          {envio > 0 && (
+            <div className="mt-3 flex items-baseline justify-between text-xs">
+              <span className="uppercase tracking-widest text-ash">Envío</span>
+              <span className="text-paper">{pesos(envio)}</span>
+            </div>
+          )}
+
           <div className="mt-4 flex items-baseline justify-between">
             <span className="text-xs uppercase tracking-widest text-ash">
               Total {descuento > 0 && <span className="text-amber">(−10% efectivo)</span>}
             </span>
-            <span className="display text-2xl text-amber">{pesos(subtotal - descuento)}</span>
+            <span className="display text-2xl text-amber">{pesos(subtotal - descuento + envio)}</span>
           </div>
 
           <Boton variante="primario" disabled={!listo} onClick={guardar} className="mt-3 w-full py-3.5">
