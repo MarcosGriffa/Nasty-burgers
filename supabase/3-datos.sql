@@ -178,8 +178,7 @@ insert into public.medios_pago (nombre, tipo, clave, comision, activo) values
   ('Efectivo', 'Efectivo', 'efectivo', 0, true),
   ('Mercado Pago', 'Online', 'mercadopago', 3.5, true),
   ('Transferencia', 'Bancario', 'transferencia', 0, true),
-  ('Tarjeta Débito', 'Tarjeta', null, 1.8, true),
-  ('Tarjeta Crédito', 'Tarjeta', null, 3.2, true);
+  ('Tarjeta', 'Tarjeta', 'tarjeta', 0, true);
 
 -- Cajas ---------------------------------------------------------------------
 delete from public.cajas;

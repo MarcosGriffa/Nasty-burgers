@@ -327,8 +327,13 @@ export const MEDIOS_PAGO = [
   { nombre: 'Efectivo', tipo: 'Efectivo', clave: 'efectivo', comision: 0, activo: true },
   { nombre: 'Mercado Pago', tipo: 'Online', clave: 'mercadopago', comision: 3.5, activo: true },
   { nombre: 'Transferencia', tipo: 'Bancario', clave: 'transferencia', comision: 0, activo: true },
-  { nombre: 'Tarjeta Débito', tipo: 'Tarjeta', clave: '', comision: 1.8, activo: true },
-  { nombre: 'Tarjeta Crédito', tipo: 'Tarjeta', clave: '', comision: 3.2, activo: true },
+  // Un solo medio «Tarjeta», con la clave puesta y 0 % (decisión D6: al local no
+  // le cobran arancel). Antes había dos filas —débito 1,8 % y crédito 3,2 %— y
+  // ninguna con clave, porque el pedido solo dice «tarjeta» y no había forma de
+  // saber cuál de las dos aplicar: las ventas con tarjeta quedaban «sin asignar»
+  // y la ganancia neta salía incompleta. Cero asignado no es lo mismo que sin
+  // asignar.
+  { nombre: 'Tarjeta', tipo: 'Tarjeta', clave: 'tarjeta', comision: 0, activo: true },
 ]
 
 export const CAJAS = [{ nombre: 'Principal', activa: true }]
