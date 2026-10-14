@@ -313,16 +313,28 @@ export const DESCUENTOS = [
 // sería inventar plata. Hasta que se defina, el panel avisa que las ventas con
 // tarjeta no tienen comisión asignada.
 export const MEDIOS_PAGO = [
+  // Las formas de cobro que el local usa de verdad, en el mismo orden en que
+  // las lista el arqueo de Fudo, para que al cerrar la caja el encargado
+  // encuentre lo que viene encontrando hace años.
+  //
+  // `clave` es el enganche con la forma de pago que trae el pedido. Dos de
+  // estas no tienen enganche a propósito:
+  //   - «Online Pedidos Ya» entra por fuera del sistema (hasta que esté la API
+  //     de partners, B8).
+  //   - «Mercado Pago QR» se cobra con el celular del local: el pedido no sabe
+  //     distinguirlo del Mercado Pago de la web.
+  // Sin clave no se les asigna ninguna venta, y está bien: en el cierre el
+  // empleado declara lo que contó igual. Lo que NO se hace es adivinar.
+  //
+  // Ojo con las comisiones: las dos nuevas están sin cargar porque Marcos
+  // todavía no pasó el arancel real. Un número inventado acá vuelve a ensuciar
+  // la ganancia neta, que es justo lo que se arregló en T1.4 y T1.8.
   { nombre: 'Efectivo', tipo: 'Efectivo', clave: 'efectivo', comision: 0, activo: true },
+  { nombre: 'Tarj. Débito', tipo: 'Tarjeta', clave: 'tarjeta', comision: 0, activo: true },
   { nombre: 'Mercado Pago', tipo: 'Online', clave: 'mercadopago', comision: 3.5, activo: true },
   { nombre: 'Transferencia', tipo: 'Bancario', clave: 'transferencia', comision: 0, activo: true },
-  // Un solo medio «Tarjeta», con la clave puesta y 0 % (decisión D6: al local no
-  // le cobran arancel). Antes había dos filas —débito 1,8 % y crédito 3,2 %— y
-  // ninguna con clave, porque el pedido solo dice «tarjeta» y no había forma de
-  // saber cuál de las dos aplicar: las ventas con tarjeta quedaban «sin asignar»
-  // y la ganancia neta salía incompleta. Cero asignado no es lo mismo que sin
-  // asignar.
-  { nombre: 'Tarjeta', tipo: 'Tarjeta', clave: 'tarjeta', comision: 0, activo: true },
+  { nombre: 'Mercado Pago QR', tipo: 'Online', clave: '', comision: null, activo: true },
+  { nombre: 'Online Pedidos Ya', tipo: 'Online', clave: '', comision: null, activo: true },
 ]
 
 export const CAJAS = [{ nombre: 'Principal', activa: true }]

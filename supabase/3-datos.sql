@@ -171,9 +171,11 @@ insert into public.descuentos (nombre, tipo, valor, activo) values
 delete from public.medios_pago;
 insert into public.medios_pago (nombre, tipo, clave, comision, activo) values
   ('Efectivo', 'Efectivo', 'efectivo', 0, true),
+  ('Tarj. Débito', 'Tarjeta', 'tarjeta', 0, true),
   ('Mercado Pago', 'Online', 'mercadopago', 3.5, true),
   ('Transferencia', 'Bancario', 'transferencia', 0, true),
-  ('Tarjeta', 'Tarjeta', 'tarjeta', 0, true);
+  ('Mercado Pago QR', 'Online', null, null, true),
+  ('Online Pedidos Ya', 'Online', null, null, true);
 
 -- Cajas ---------------------------------------------------------------------
 delete from public.cajas;

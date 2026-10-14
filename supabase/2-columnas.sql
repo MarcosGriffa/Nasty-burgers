@@ -126,7 +126,15 @@ alter table public.arqueos
   add column if not exists usuario       text,
   add column if not exists sistema       integer default 0,
   add column if not exists usuario_monto integer default 0,
-  add column if not exists conciliado    boolean default false;
+  add column if not exists conciliado    boolean default false,
+  -- Con cuanto efectivo se abrio el turno. Cuenta para lo que tiene que haber
+  -- al cerrar: esos billetes se cuentan igual.
+  add column if not exists monto_inicial integer default 0,
+  add column if not exists cerrado_por   text,
+  -- Lo que declaro el empleado, una entrada por forma de cobro. Va como jsonb
+  -- y no una columna por medio: el local agrega formas de cobro desde el panel
+  -- y la base no se tiene que tocar cada vez.
+  add column if not exists declarado     jsonb default '{}'::jsonb;
 
 alter table public.cajas
   add column if not exists nombre text,
