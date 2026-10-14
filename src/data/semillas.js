@@ -333,8 +333,21 @@ export const MEDIOS_PAGO = [
   { nombre: 'Tarj. Débito', tipo: 'Tarjeta', clave: 'tarjeta', comision: 0, activo: true },
   { nombre: 'Mercado Pago', tipo: 'Online', clave: 'mercadopago', comision: 3.5, activo: true },
   { nombre: 'Transferencia', tipo: 'Bancario', clave: 'transferencia', comision: 0, activo: true },
-  { nombre: 'Mercado Pago QR', tipo: 'Online', clave: '', comision: null, activo: true },
-  { nombre: 'Online Pedidos Ya', tipo: 'Online', clave: '', comision: null, activo: true },
+  // El QR SÍ tiene clave: lo cobra el empleado en el mostrador y lo marca como
+  // tal, así que el sistema puede contarlo igual que el efectivo.
+  { nombre: 'Mercado Pago QR', tipo: 'Online', clave: 'qr', comision: null, activo: true },
+  // Pedidos Ya no se identifica por forma de pago sino por DE DÓNDE vino el
+  // pedido: la plata la cobra PedidosYa y le llega al local por liquidación.
+  // Esa plata nunca pasa por el cajón, y por eso se marca `fuera_de_caja`.
+  {
+    nombre: 'Online Pedidos Ya',
+    tipo: 'Online',
+    clave: '',
+    origen: 'Pedidos Ya',
+    fuera_de_caja: true,
+    comision: null,
+    activo: true,
+  },
 ]
 
 export const CAJAS = [{ nombre: 'Principal', activa: true }]

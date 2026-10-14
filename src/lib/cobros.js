@@ -21,12 +21,20 @@
  * "esto no lo sé" en vez de inventar un porcentaje.
  */
 
-/** Las cuatro formas de pago que puede traer un pedido (web y mostrador). */
+/**
+ * Las formas de pago que puede traer un pedido.
+ *
+ * `qr` es del mostrador: el cliente escanea el QR del local con el celular. No
+ * es lo mismo que `mercadopago` —que es el pago online de la web— aunque la
+ * plata termine en la misma cuenta: entran por canales distintos, el arancel
+ * puede ser distinto, y el empleado los cuenta por separado al cerrar la caja.
+ */
 export const CLAVES_PAGO = [
   { clave: 'efectivo', label: 'Efectivo' },
   { clave: 'mercadopago', label: 'Mercado Pago' },
   { clave: 'transferencia', label: 'Transferencia' },
   { clave: 'tarjeta', label: 'Tarjeta' },
+  { clave: 'qr', label: 'Mercado Pago QR' },
 ]
 
 export const CLAVES = CLAVES_PAGO.map((p) => p.clave)

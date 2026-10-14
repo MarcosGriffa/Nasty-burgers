@@ -52,11 +52,17 @@ export function calcularArqueo(arqueo, pedidos = [], movimientos = [], medios = 
   const porMedio = new Map()
   mediosDelArqueo(medios).forEach((m) => porMedio.set(m.nombre, 0))
 
+  // Algunos medios no se reconocen por la forma de pago sino por DE DÓNDE vino
+  // el pedido: Pedidos Ya cobra él y le liquida al local, así que el pedido
+  // puede decir cualquier cosa en `pago`. El origen manda sobre la clave.
+  const porOrigen = mediosDelArqueo(medios).filter((m) => m.origen)
+
   let ventasTotal = 0
   ventas.forEach((p) => {
     const monto = Number(p.total) || 0
     ventasTotal += monto
-    const medio = medioDe(medios, p.pago)
+    const porSuOrigen = porOrigen.find((m) => m.origen === p.origen)
+    const medio = porSuOrigen ?? medioDe(medios, p.pago)
     if (medio) porMedio.set(medio.nombre, (porMedio.get(medio.nombre) || 0) + monto)
   })
 
@@ -70,9 +76,17 @@ export function calcularArqueo(arqueo, pedidos = [], movimientos = [], medios = 
 
   const ingresos = ventasTotal + ingresosManuales
 
+  // Lo que entró por canales que no pasan por el cajón del local (Pedidos Ya
+  // liquida aparte). Se informa para que el encargado sepa que esa plata no la
+  // tiene que encontrar contando.
+  const fueraDeCaja = mediosDelArqueo(medios)
+    .filter((m) => m.fuera_de_caja)
+    .reduce((a, m) => a + (porMedio.get(m.nombre) || 0), 0)
+
   return {
     inicial,
     ventas: ventasTotal,
+    fueraDeCaja,
     ingresosManuales,
     ingresos,
     egresos,

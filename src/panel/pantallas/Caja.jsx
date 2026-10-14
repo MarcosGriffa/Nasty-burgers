@@ -335,6 +335,14 @@ export function Arqueos({ ctrl }) {
                   <Fila label="Total" valor={pesos(s.total)} tono="amber" fuerte borde={false} />
                 </div>
 
+                {s.fueraDeCaja > 0 && (
+                  <p className="mt-2 text-xs text-ash">
+                    De ese total, <span className="text-paper">{pesos(s.fueraDeCaja)}</span> entró
+                    por canales que no pasan por el cajón (Pedidos Ya liquida aparte). Esa plata no
+                    la vas a encontrar contando.
+                  </p>
+                )}
+
                 <p className="mb-2 mt-5 text-[10px] font-extrabold uppercase tracking-[0.2em] text-ash">
                   Según vos
                 </p>
@@ -350,14 +358,20 @@ export function Arqueos({ ctrl }) {
                         {m.nombre}
                         {/* El que no tiene enganche no suma del lado del sistema:
                             se avisa para que nadie busque un error que no existe. */}
-                        {!m.clave && (
+                        {m.fuera_de_caja ? (
                           <span className="block text-[10px] uppercase tracking-wider text-ash">
-                            no lo calcula el sistema
+                            no pasa por la caja
                           </span>
+                        ) : (
+                          !m.clave && (
+                            <span className="block text-[10px] uppercase tracking-wider text-ash">
+                              no lo calcula el sistema
+                            </span>
+                          )
                         )}
                       </span>
                       <span className="w-24 text-right text-xs tabular-nums text-ash">
-                        {m.clave ? pesos(s.porMedio[m.nombre] || 0) : '—'}
+                        {m.clave || m.origen ? pesos(s.porMedio[m.nombre] || 0) : '—'}
                       </span>
                       <input
                         type="number"

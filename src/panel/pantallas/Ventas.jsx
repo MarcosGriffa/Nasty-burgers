@@ -55,7 +55,9 @@ function NuevoPedido({ modalidad, onCerrar }) {
   // En delivery la tarjeta no es una opción: el posnet queda en el local. Si el
   // empleado la había elegido y después pasa el pedido a delivery, la elección
   // se cae sola en vez de guardar un medio que el repartidor no puede cobrar.
-  const pagoVigente = modalidad === 'delivery' && pago === 'tarjeta' ? 'efectivo' : pago
+  const SOLO_EN_EL_LOCAL = ['tarjeta', 'qr']
+  const pagoVigente =
+    modalidad === 'delivery' && SOLO_EN_EL_LOCAL.includes(pago) ? 'efectivo' : pago
 
   // Misma regla que la web, del mismo archivo: en delivery no se descuenta (D7).
   // Si esto se calculara acá a mano, el pedido telefónico saldría más barato que
@@ -159,8 +161,10 @@ function NuevoPedido({ modalidad, onCerrar }) {
                 <option value="efectivo">Efectivo</option>
                 <option value="mercadopago">Mercado Pago</option>
                 <option value="transferencia">Transferencia</option>
-                {/* En delivery no va: el posnet queda en el local. */}
-                {modalidad !== 'delivery' && <option value="tarjeta">Tarjeta</option>}
+                {/* Ninguna de las dos va en delivery: el posnet y el QR del
+                    local quedan en el mostrador, el repartidor no los lleva. */}
+                {modalidad !== 'delivery' && <option value="tarjeta">Tarj. Débito</option>}
+                {modalidad !== 'delivery' && <option value="qr">Mercado Pago QR</option>}
               </select>
               <select value={local} onChange={(e) => setLocal(e.target.value)} className={input}>
                 {LOCALES.map((l) => (

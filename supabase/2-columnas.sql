@@ -155,7 +155,11 @@ alter table public.medios_pago
   add column if not exists tipo     text,
   add column if not exists clave    text,
   add column if not exists comision numeric default 0,
-  add column if not exists activo   boolean default true;
+  add column if not exists activo   boolean default true,
+  -- Algunos medios no se reconocen por la forma de pago sino por de donde vino
+  -- el pedido (Pedidos Ya cobra el y liquida aparte).
+  add column if not exists origen        text,
+  add column if not exists fuera_de_caja boolean default false;
 
 alter table public.cuentas_bancarias
   add column if not exists nombre text,

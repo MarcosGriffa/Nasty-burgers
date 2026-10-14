@@ -284,7 +284,12 @@ export const ENTIDADES = {
       {
         k: 'clave',
         label: 'Cobra en',
-        calc: (f) => CLAVES_PAGO.find((p) => p.clave === f.clave)?.label ?? '— sin asignar',
+        calc: (f) =>
+          CLAVES_PAGO.find((p) => p.clave === f.clave)?.label ??
+          // Hay medios que no se reconocen por la forma de pago sino por de
+          // dónde vino el pedido. Decirles «sin asignar» manda a buscar un
+          // problema que no existe.
+          (f.origen ? `Pedidos de ${f.origen}` : '— sin asignar'),
       },
       { k: 'comision', label: 'Comisión %', num: true },
       { k: 'activo', label: 'Activo', tipo: 'bool' },
