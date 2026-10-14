@@ -295,6 +295,52 @@ export async function eliminar(nombre, id) {
   if (error) throw error
 }
 
+// ---------------------------------------------------------------------------
+// UN CANAL POR TABLA, COMPARTIDO
+//
+// Varias pantallas miran la misma tabla al mismo tiempo (Productos y su editor,
+// la carta de la web en dos componentes, los reportes). Cada una pedía su
+// propio canal de realtime con el mismo nombre, y ahí explotaba todo.
+//
+// Acá se lleva una sola entrada por tabla: un canal, una consulta en vuelo, y
+// la lista de pantallas que quieren enterarse. La última que se va apaga la luz.
+// ---------------------------------------------------------------------------
+
+const colecciones = new Map() // nombre -> { oyentes, estado, canal, trayendo }
+let contadorCanal = 0
+
+function entradaDe(nombre) {
+  let e = colecciones.get(nombre)
+  if (!e) {
+    e = { oyentes: new Set(), estado: null, canal: null, trayendo: null }
+    colecciones.set(nombre, e)
+  }
+  return e
+}
+
+/** Trae la tabla una sola vez aunque se lo pidan diez pantallas juntas. */
+function traerColeccion(nombre) {
+  const e = entradaDe(nombre)
+  if (e.trayendo) return e.trayendo
+
+  e.trayendo = (async () => {
+    const { data, error } = await supabase.from(nombre).select('*')
+    e.trayendo = null
+    if (!colecciones.has(nombre)) return // se fueron todos mientras consultaba
+    if (error) {
+      // Antes acá no se hacía nada: si la base contestaba con error, la pantalla
+      // se quedaba cargando para siempre y nadie se enteraba de por qué.
+      console.error(`No pude leer «${nombre}» de la base:`, error)
+      e.estado = { filas: [], error }
+    } else {
+      e.estado = { filas: data ?? [], error: null }
+    }
+    e.oyentes.forEach((fn) => fn(e.estado.filas, e.estado.error))
+  })()
+
+  return e.trayendo
+}
+
 export function suscribir(nombre, alCambiar, semilla) {
   // colección vacía: se usa cuando una pantalla no necesita datos relacionados
   if (!nombre || nombre === 'noop') {
@@ -312,19 +358,37 @@ export function suscribir(nombre, alCambiar, semilla) {
     return () => oyentes.get(nombre)?.delete(emitir)
   }
 
-  let vivo = true
-  const traer = async () => {
-    const { data, error } = await supabase.from(nombre).select('*')
-    if (!error && vivo) alCambiar(data ?? [])
+  const e = entradaDe(nombre)
+  e.oyentes.add(alCambiar)
+
+  // Si otra pantalla ya trajo esta tabla, esta arranca con lo que hay en vez de
+  // quedarse en blanco esperando su propia consulta.
+  if (e.estado) alCambiar(e.estado.filas, e.estado.error)
+
+  if (!e.canal) {
+    // El nombre del canal lleva un sufijo único a propósito. Supabase devuelve
+    // el canal YA EXISTENTE si se le pide uno con el mismo nombre, y llamar
+    // `.on()` sobre un canal ya suscripto tira una excepción que se llevaba
+    // puesta toda la aplicación —pantalla en negro, sin un cartel que explique
+    // nada—. Pasaba siempre que dos pantallas miraban la misma tabla, que es lo
+    // normal: Productos y el editor, o la carta de la web en dos componentes.
+    e.canal = supabase
+      .channel(`col-${nombre}-${++contadorCanal}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: nombre }, () =>
+        traerColeccion(nombre),
+      )
+      .subscribe()
   }
-  traer()
-  const rt = supabase
-    .channel(`col-${nombre}`)
-    .on('postgres_changes', { event: '*', schema: 'public', table: nombre }, traer)
-    .subscribe()
+
+  traerColeccion(nombre)
+
   return () => {
-    vivo = false
-    supabase.removeChannel(rt)
+    e.oyentes.delete(alCambiar)
+    // El canal se da de baja recién cuando no queda nadie mirando la tabla.
+    if (e.oyentes.size === 0) {
+      if (e.canal) supabase.removeChannel(e.canal)
+      colecciones.delete(nombre)
+    }
   }
 }
 
@@ -344,13 +408,18 @@ export function reemplazarDemo(nombre, filas) {
 export function useColeccion(nombre, semilla) {
   const [filas, setFilas] = useState([])
   const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     setCargando(true)
+    setError(null)
     const baja = suscribir(
       nombre,
-      (f) => {
+      (f, err) => {
         setFilas(f)
+        // Un error de la base no es "no hay datos": son dos cosas distintas y
+        // la pantalla tiene que poder decir cuál de las dos le pasó.
+        setError(err ?? null)
         setCargando(false)
       },
       semilla,
@@ -363,6 +432,7 @@ export function useColeccion(nombre, semilla) {
   return {
     filas,
     cargando,
+    error,
     crear: (d) => crear(nombre, d),
     actualizar: (id, c) => actualizar(nombre, id, c),
     eliminar: (id) => eliminar(nombre, id),

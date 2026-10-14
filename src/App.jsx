@@ -10,6 +10,7 @@ import Shell from './panel/Shell'
 import { useCarrito } from './hooks/useCarrito'
 import { useReveals } from './lib/scroll'
 import { useRuta } from './lib/ruta'
+import Pantallazo from './components/Pantallazo'
 
 function Web() {
   const carrito = useCarrito()
@@ -37,5 +38,11 @@ function Web() {
 
 export default function App() {
   const ruta = useRuta()
-  return ruta.startsWith('/panel') ? <Shell /> : <Web />
+  // La clave hace que al cambiar de pantalla la red de contención se resetee:
+  // si una pantalla quedó rota, irse a otra no tiene por qué arrastrar el error.
+  return (
+    <Pantallazo key={ruta} donde={ruta.startsWith('/panel') ? 'el sistema del local' : 'la web'}>
+      {ruta.startsWith('/panel') ? <Shell /> : <Web />}
+    </Pantallazo>
+  )
 }

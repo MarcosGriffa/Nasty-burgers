@@ -125,6 +125,8 @@ export async function actualizarPedido(id, cambios) {
  */
 export const VENTANA_DIAS = 300
 
+let contadorCanalPedidos = 0
+
 export function suscribirPedidos(alCambiar) {
   if (modoDemo) {
     const emitir = () => alCambiar(leerDemo())
@@ -161,8 +163,13 @@ export function suscribirPedidos(alCambiar) {
   }
 
   traer()
+  // El sufijo único no es capricho: Supabase devuelve el canal ya existente si
+  // se le pide uno con el mismo nombre, y engancharle un `.on()` después del
+  // `.subscribe()` tira una excepción que deja la pantalla en negro. Con el
+  // panel abierto en dos pestañas del mismo equipo, o con el tablero montándose
+  // de nuevo al cambiar de módulo, el nombre fijo se repetía.
   const canalRt = supabase
-    .channel('pedidos-panel')
+    .channel(`pedidos-panel-${++contadorCanalPedidos}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, traer)
     .subscribe()
 

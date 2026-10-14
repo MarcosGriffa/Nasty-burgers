@@ -112,7 +112,7 @@ function Detalle({ def, fila, conteo, onEditar, onEliminar, onCerrar }) {
 
 export default function Crud({ coleccion }) {
   const def = ENTIDADES[coleccion]
-  const { filas, crear, actualizar, eliminar } = useColeccion(coleccion, def.semilla)
+  const { filas, error, crear, actualizar, eliminar } = useColeccion(coleccion, def.semilla)
   const relacionada = useColeccion(def.contarEn?.coleccion ?? 'noop', undefined)
 
   const [busqueda, setBusqueda] = useState('')
@@ -166,6 +166,22 @@ export default function Crud({ coleccion }) {
           + Nuevo
         </Boton>
       </Encabezado>
+
+      {/* Que la pantalla no mienta: lista vacia por error no es lista vacia. */}
+      {error && (
+        <div className="mb-5 rounded-xl border border-flame/40 bg-flame/10 p-4">
+          <p className="text-sm font-bold text-paper">
+            No pude leer «{coleccion}» de la base de datos.
+          </p>
+          <p className="mt-1 text-xs text-ash">
+            Lo de abajo no es que no haya registros: es que la consulta falló. No
+            cargues nada acá hasta resolverlo.
+          </p>
+          <pre className="mt-3 overflow-auto rounded-lg bg-ink-2 p-3 text-[11px] text-amber">
+            {String(error?.message || error?.hint || JSON.stringify(error))}
+          </pre>
+        </div>
+      )}
 
       <div className={`grid gap-5 ${seleccionada && !def.editor ? 'xl:grid-cols-[1fr_340px]' : ''}`}>
         <Tabla
