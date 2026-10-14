@@ -6,7 +6,7 @@ import Carrito from './Carrito'
 import Opciones from './Opciones'
 import Foto from './Foto'
 
-function ItemCard({ item, cantidad, onAgregar, onQuitar, indice = 0 }) {
+function ItemCard({ item, cantidad, onAgregar, onQuitar, indice = 0, promo = null }) {
   return (
     <article
       data-reveal
@@ -21,12 +21,12 @@ function ItemCard({ item, cantidad, onAgregar, onQuitar, indice = 0 }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-start justify-between gap-2">
           <h4 className="display text-lg text-paper">{item.nombreCorto ?? item.nombre}</h4>
-          {item.promo && (
+          {item.enPromo && (
             <span className="shrink-0 rounded-full bg-flame px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-ink">
-              Promo
+              {promo?.etiqueta ?? 'Promo'}
             </span>
           )}
-          {!item.promo && item.destacado && (
+          {!item.enPromo && item.destacado && (
             <span className="shrink-0 rounded-full bg-amber px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-ink">
               Top
             </span>
@@ -36,7 +36,15 @@ function ItemCard({ item, cantidad, onAgregar, onQuitar, indice = 0 }) {
           <p className="mt-1 line-clamp-3 text-xs leading-relaxed text-ash">{item.desc}</p>
         )}
         <div className="mt-auto flex items-center justify-between pt-3">
-          <span className="display text-lg text-amber">{pesos(item.precio)}</span>
+          {/* Con promo se muestran los dos precios: el de lista tachado y el de
+              hoy. Si solo se mostrara el nuevo, el cliente no se entera de que
+              la promo existe, que es justamente para lo que se hace. */}
+          <span className="flex items-baseline gap-2">
+            {item.enPromo && (
+              <span className="text-xs text-ash line-through">{pesos(item.precioLista)}</span>
+            )}
+            <span className="display text-lg text-amber">{pesos(item.precio)}</span>
+          </span>
           {cantidad === 0 ? (
             <button
               type="button"
@@ -80,7 +88,7 @@ export default function Pedido({ carrito, drawerAbierto, setDrawerAbierto }) {
 
   // La carta sale de la misma tabla de productos que edita el panel: lo que el
   // empleado agrega o cambia allá, aparece acá.
-  const { secciones, gruposModificadores } = useMenuPublico()
+  const { secciones, gruposModificadores, promo } = useMenuPublico()
 
   // el producto que el cliente está armando en la ventana de opciones
   const [armando, setArmando] = useState(null)
@@ -168,6 +176,21 @@ export default function Pedido({ carrito, drawerAbierto, setDrawerAbierto }) {
           </label>
         </div>
 
+        {/* La promo del día, anunciada una sola vez y arriba de todo. Antes vivía
+            como una categoría con productos duplicados, así que se veía los
+            siete días aunque fuera la promo del miércoles. */}
+        {promo && (
+          <div className="mb-6 rounded-2xl border border-flame/40 bg-flame/10 px-5 py-4">
+            <p className="display text-xl text-paper">
+              {promo.titulo}
+              <span className="ml-2 rounded-full bg-flame px-2 py-0.5 align-middle text-[10px] font-extrabold uppercase tracking-wider text-ink">
+                hoy
+              </span>
+            </p>
+            <p className="mt-1 text-sm text-ash">{promo.bajada}</p>
+          </div>
+        )}
+
         {/* chips de categoria */}
         <div className="no-scrollbar sticky top-16 z-30 -mx-5 mb-8 overflow-x-auto bg-ink/95 px-5 py-3 backdrop-blur sm:-mx-8 sm:px-8">
           <div className="flex gap-2">
@@ -208,6 +231,7 @@ export default function Pedido({ carrito, drawerAbierto, setDrawerAbierto }) {
                       cantidad={carrito.cantidadDe(item.id)}
                       onAgregar={pedir}
                       onQuitar={carrito.quitarPorProducto}
+                      promo={promo}
                     />
                   ))}
                 </div>

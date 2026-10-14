@@ -12,7 +12,10 @@ import { modoDemo } from '../lib/supabase'
 const PAGOS = [
   { id: 'efectivo', label: 'Efectivo', notaRetiro: '10% OFF' },
   { id: 'transferencia', label: 'Transferencia' },
-  { id: 'tarjeta', label: 'Tarjeta' },
+  // El posnet está en el local: el repartidor no lo lleva, así que con
+  // delivery la tarjeta no es una opción real. Ofrecerla y que después no se
+  // pueda cobrar es peor que no ofrecerla (Marcos, 14/10).
+  { id: 'tarjeta', label: 'Tarjeta', soloRetiro: true },
 ]
 
 const MODALIDADES = [
@@ -66,10 +69,17 @@ export default function Carrito({
   const { abierto, motivo, cerradoDelTodo, costoEnvio, montoMinimo } = useTienda(modalidad)
 
   const local = LOCALES.find((l) => l.id === localId) ?? null
-  const descuento = descuentoEfectivo(pago, modalidad)
+  // Con delivery la tarjeta no se muestra: el posnet queda en el local, el
+  // repartidor no lo lleva. Y si el cliente ya la había elegido y después se
+  // pasa a delivery, la elección se cae sola: guardar el pedido con un medio
+  // que no se puede cobrar es descubrir el problema en la puerta de la casa.
+  const pagosVisibles = PAGOS.filter((p) => !(p.soloRetiro && modalidad === 'delivery'))
+  const pagoVigente = pagosVisibles.some((p) => p.id === pago) ? pago : pagosVisibles[0].id
+
+  const descuento = descuentoEfectivo(pagoVigente, modalidad)
   // El cliente eligió efectivo pero pidió delivery: hay que avisarle ahí mismo,
   // no dejar que se entere mirando un total que no baja.
-  const efectivoSinDescuento = pago === 'efectivo' && modalidad === 'delivery'
+  const efectivoSinDescuento = pagoVigente === 'efectivo' && modalidad === 'delivery'
   const envio = modalidad === 'delivery' ? costoEnvio : 0
   const total = subtotal - descuento + envio
 
@@ -116,7 +126,7 @@ export default function Carrito({
         // tienen que seguir mostrando lo que se cobró de verdad
         envio,
         total,
-        pago,
+        pago: pagoVigente,
       })
       setConfirmado(pedido)
     } catch (e) {
@@ -359,14 +369,14 @@ export default function Carrito({
               <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-ash">
                 Forma de pago
               </p>
-              <div className="grid grid-cols-3 gap-2">
-                {PAGOS.map((p) => (
+              <div className={`grid gap-2 ${pagosVisibles.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                {pagosVisibles.map((p) => (
                   <button
                     key={p.id}
                     type="button"
                     onClick={() => setPago(p.id)}
                     className={`rounded-xl border px-2 py-2.5 text-xs font-bold transition-colors ${
-                      pago === p.id
+                      pagoVigente === p.id
                         ? 'border-amber bg-amber text-ink'
                         : 'border-white/15 text-paper hover:border-white/35'
                     }`}

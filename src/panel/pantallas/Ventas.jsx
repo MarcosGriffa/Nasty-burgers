@@ -52,10 +52,15 @@ function NuevoPedido({ modalidad, onCerrar }) {
     })
 
   const subtotal = items.reduce((a, i) => a + i.precio * i.cantidad, 0)
+  // En delivery la tarjeta no es una opción: el posnet queda en el local. Si el
+  // empleado la había elegido y después pasa el pedido a delivery, la elección
+  // se cae sola en vez de guardar un medio que el repartidor no puede cobrar.
+  const pagoVigente = modalidad === 'delivery' && pago === 'tarjeta' ? 'efectivo' : pago
+
   // Misma regla que la web, del mismo archivo: en delivery no se descuenta (D7).
   // Si esto se calculara acá a mano, el pedido telefónico saldría más barato que
   // el de la web y nadie se enteraría hasta cerrar la caja.
-  const descuento = descuentoPorEfectivo(subtotal, pago, modalidad, NEGOCIO.promoEfectivo)
+  const descuento = descuentoPorEfectivo(subtotal, pagoVigente, modalidad, NEGOCIO.promoEfectivo)
   const listo = items.length > 0 && nombre.trim().length > 1
 
   const guardar = async () => {
@@ -72,7 +77,7 @@ function NuevoPedido({ modalidad, onCerrar }) {
       descuento,
       envio,
       total: subtotal - descuento + envio,
-      pago,
+      pago: pagoVigente,
       origen: 'Mostrador',
     })
     onCerrar()
@@ -150,11 +155,12 @@ function NuevoPedido({ modalidad, onCerrar }) {
               <input value={direccion} onChange={(e) => setDireccion(e.target.value)} placeholder="Dirección" className={input} />
             )}
             <div className="grid grid-cols-2 gap-2">
-              <select value={pago} onChange={(e) => setPago(e.target.value)} className={input}>
+              <select value={pagoVigente} onChange={(e) => setPago(e.target.value)} className={input}>
                 <option value="efectivo">Efectivo</option>
                 <option value="mercadopago">Mercado Pago</option>
                 <option value="transferencia">Transferencia</option>
-                <option value="tarjeta">Tarjeta</option>
+                {/* En delivery no va: el posnet queda en el local. */}
+                {modalidad !== 'delivery' && <option value="tarjeta">Tarjeta</option>}
               </select>
               <select value={local} onChange={(e) => setLocal(e.target.value)} className={input}>
                 {LOCALES.map((l) => (

@@ -9,7 +9,6 @@ import { nombreCompleto } from '../lib/utils.js'
 
 const AREA = {
   pampera: 'Cocina',
-  promo: 'Cocina',
   simples: 'Cocina',
   dobles: 'Cocina',
   triples: 'Cocina',
@@ -21,7 +20,6 @@ const AREA = {
 
 const NOMBRE_CAT = {
   pampera: 'La Pampera - Burga del Mundial',
-  promo: 'Promo Miércoles - Melt 10% OFF',
   simples: 'Hamburguesas c/ Papas Fritas',
   dobles: 'Hamburguesas c/ Papas Fritas',
   triples: 'Hamburguesas c/ Papas Fritas',
@@ -122,7 +120,7 @@ const CHEDDAR = { Simple: 2, Doble: 4, Triple: 6 }
 const MEDALLONES = { Simple: 1, Doble: 2, Triple: 3 }
 
 function recetaDe(id, subcategoria) {
-  const familia = id.replace(/-(s|d|t)$/, '').replace(/^melt-promo-/, 'melt').replace(/-(simple|doble|triple)$/, '')
+  const familia = id.replace(/-(s|d|t)$/, '').replace(/-(simple|doble|triple)$/, '')
   const relleno = RELLENO[familia]
   if (!relleno) return []
 
@@ -199,7 +197,6 @@ export const PRODUCTOS = [
 
 export const CAT_PRODUCTOS = [
   { nombre: 'La Pampera - Burga del Mundial', area: 'Cocina', bajada: 'La burga del mundial' },
-  { nombre: 'Promo Miércoles - Melt 10% OFF', area: 'Cocina', bajada: 'Melt 2.0 con 10% OFF' },
   { nombre: 'Hamburguesas c/ Papas Fritas', area: 'Cocina', bajada: '' },
   { nombre: 'Papas Fritas', area: 'Cocina', bajada: '' },
   { nombre: 'Extras', area: 'Cocina', bajada: '' },

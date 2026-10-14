@@ -76,37 +76,6 @@ export const CATEGORIAS = [
     ],
   },
   {
-    id: 'promo',
-    nombre: 'Promo Miércoles',
-    bajada: 'Melt 2.0 con 10% OFF',
-    items: [
-      {
-        id: 'melt-promo-simple',
-        nombre: 'Melt 2.0 Simple',
-        desc: 'Pan de Papa + Medallón de 120 g + Cheddar x2 + Salsa Cheddar + Bacon Bits + Mayonesa. Con papas fritas.',
-        precio: 13680,
-        img: 'melt-s.jpg',
-        promo: true,
-      },
-      {
-        id: 'melt-promo-doble',
-        nombre: 'Melt 2.0 Doble',
-        desc: 'Pan de Papa + 2 Medallones de 120 g + Cheddar x4 + Salsa Cheddar + Bacon Bits + Mayonesa. Con papas fritas.',
-        precio: 15660,
-        img: 'melt-d.jpg',
-        promo: true,
-      },
-      {
-        id: 'melt-promo-triple',
-        nombre: 'Melt 2.0 Triple',
-        desc: 'Pan de Papa + 3 Medallones de 120 g + Cheddar x6 + Salsa Cheddar + Bacon Bits + Mayonesa. Con papas fritas.',
-        precio: 17640,
-        img: 'melt-t.jpg',
-        promo: true,
-      },
-    ],
-  },
-  {
     id: 'simples',
     nombre: 'Simples',
     bajada: 'Un medallón. Todas con papas fritas.',
