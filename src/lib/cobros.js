@@ -95,3 +95,35 @@ export function comisiones(pedidos = [], medios = []) {
     sinAsignar: filas.filter((f) => f.sinAsignar).map((f) => f.label),
   }
 }
+
+// ---------------------------------------------------------------------------
+// EL 10 % POR PAGAR EN EFECTIVO
+// ---------------------------------------------------------------------------
+//
+// Por qué vive acá: la cuenta estaba escrita en tres lugares distintos —el
+// carrito de la web, el mostrador del panel y el generador de pedidos de
+// ejemplo—, cada uno con su propia copia del `* 0.1`. Tres copias de una regla
+// de plata es tres chances de que una quede vieja, y así fue: el descuento se
+// aplicaba también en delivery, donde el local ya está poniendo el envío.
+//
+// Decisión D7: el 10 % es **solo para take away**. El que paga en efectivo y
+// retira por el local le ahorra al negocio la comisión y el viaje; el que pide
+// delivery, no.
+//
+// Si mañana cambia —otro porcentaje, o que valga también en delivery— se
+// cambia acá y cambia en los tres lados el mismo día.
+
+/** ¿A este pedido le corresponde el descuento por efectivo? */
+export const aplicaDescuentoEfectivo = (pago, modalidad) =>
+  pago === 'efectivo' && modalidad !== 'delivery'
+
+/**
+ * Lo que se le descuenta al pedido por pagar en efectivo, en pesos.
+ * `porcentaje` entra como fracción (0.1 = 10 %), igual que NEGOCIO.promoEfectivo.
+ */
+export function descuentoPorEfectivo(subtotal, pago, modalidad, porcentaje) {
+  if (!aplicaDescuentoEfectivo(pago, modalidad)) return 0
+  const n = Number(porcentaje)
+  if (!Number.isFinite(n) || n <= 0) return 0
+  return Math.round((Number(subtotal) || 0) * n)
+}

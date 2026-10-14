@@ -6,8 +6,11 @@ import { useTienda } from '../lib/tienda'
 import { precioConOpciones } from '../hooks/useCarrito'
 import { modoDemo } from '../lib/supabase'
 
+// El «10% OFF» del botón Efectivo no es fijo: aparece solo cuando el pedido es
+// para retirar, porque en delivery no se descuenta (D7). Prometerlo siempre y
+// no cumplirlo abajo, en el total, es peor que no ofrecerlo.
 const PAGOS = [
-  { id: 'efectivo', label: 'Efectivo', nota: '10% OFF' },
+  { id: 'efectivo', label: 'Efectivo', notaRetiro: '10% OFF' },
   { id: 'transferencia', label: 'Transferencia' },
   { id: 'tarjeta', label: 'Tarjeta' },
 ]
@@ -63,7 +66,10 @@ export default function Carrito({
   const { abierto, motivo, cerradoDelTodo, costoEnvio, montoMinimo } = useTienda(modalidad)
 
   const local = LOCALES.find((l) => l.id === localId) ?? null
-  const descuento = descuentoEfectivo(pago)
+  const descuento = descuentoEfectivo(pago, modalidad)
+  // El cliente eligió efectivo pero pidió delivery: hay que avisarle ahí mismo,
+  // no dejar que se entere mirando un total que no baja.
+  const efectivoSinDescuento = pago === 'efectivo' && modalidad === 'delivery'
   const envio = modalidad === 'delivery' ? costoEnvio : 0
   const total = subtotal - descuento + envio
 
@@ -366,14 +372,19 @@ export default function Carrito({
                     }`}
                   >
                     {p.label}
-                    {p.nota && (
+                    {p.notaRetiro && modalidad === 'retiro' && (
                       <span className="block text-[10px] font-semibold opacity-70">
-                        {p.nota}
+                        {p.notaRetiro}
                       </span>
                     )}
                   </button>
                 ))}
               </div>
+              {efectivoSinDescuento && (
+                <p className="mt-2 text-[11px] text-ash">
+                  El 10% OFF en efectivo es solo retirando por el local.
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">

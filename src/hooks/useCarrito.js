@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { NEGOCIO } from '../data/negocio'
+import { descuentoPorEfectivo } from '../lib/cobros'
 
 /**
  * Dos Critical Dobles no son lo mismo si una va con papas sazonadas y la otra
@@ -73,8 +74,12 @@ export function useCarrito() {
     [lineas],
   )
 
+  // La regla de a quién le toca el descuento vive en cobros.js, al lado de las
+  // comisiones: acá solo se le pasa el pedido. Hay que mandarle la modalidad
+  // porque el 10 % es solo para take away (D7).
   const descuentoEfectivo = useCallback(
-    (pago) => (pago === 'efectivo' ? Math.round(subtotal * NEGOCIO.promoEfectivo) : 0),
+    (pago, modalidad) =>
+      descuentoPorEfectivo(subtotal, pago, modalidad, NEGOCIO.promoEfectivo),
     [subtotal],
   )
 

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { LOCALES, NEGOCIO } from '../../data/negocio'
 import { useMenuPublico } from '../../lib/menu'
 import { crearPedido, ESTADOS } from '../../lib/pedidos'
+import { descuentoPorEfectivo } from '../../lib/cobros'
 import { useTienda } from '../../lib/tienda'
 import { hora, minutosDesde, pesos } from '../../lib/utils'
 import { imprimirComandaCocina, imprimirTicket } from '../../lib/imprimir'
@@ -51,7 +52,10 @@ function NuevoPedido({ modalidad, onCerrar }) {
     })
 
   const subtotal = items.reduce((a, i) => a + i.precio * i.cantidad, 0)
-  const descuento = pago === 'efectivo' ? Math.round(subtotal * NEGOCIO.promoEfectivo) : 0
+  // Misma regla que la web, del mismo archivo: en delivery no se descuenta (D7).
+  // Si esto se calculara acá a mano, el pedido telefónico saldría más barato que
+  // el de la web y nadie se enteraría hasta cerrar la caja.
+  const descuento = descuentoPorEfectivo(subtotal, pago, modalidad, NEGOCIO.promoEfectivo)
   const listo = items.length > 0 && nombre.trim().length > 1
 
   const guardar = async () => {

@@ -4,7 +4,7 @@ const FRASES = [
   'Delivery & Take Away',
   'Smash 120 g',
   'Benavídez',
-  '10% OFF en efectivo',
+  '10% OFF en efectivo retirando',
   'Escobar',
   'Papas con sazonado propio',
 ]

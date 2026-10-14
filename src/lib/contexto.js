@@ -117,7 +117,7 @@ export function contextoDelNegocio({
 
   return [
     `NEGOCIO: ${NEGOCIO.nombre}. Hamburguesería con dos locales: ${LOCALES.map((l) => l.nombre).join(' y ')}.`,
-    `Descuento vigente: ${Math.round(NEGOCIO.promoEfectivo * 100)}% pagando en efectivo.`,
+    `Descuento vigente: ${Math.round(NEGOCIO.promoEfectivo * 100)}% pagando en efectivo, SOLO en los pedidos para retirar. En delivery no se descuenta.`,
     nombreLocal
       ? `Estás hablando con el local de ${nombreLocal}: los números de abajo son SOLO de ese local.`
       : 'Los números de abajo son de los dos locales juntos.',

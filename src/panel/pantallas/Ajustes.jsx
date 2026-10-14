@@ -89,7 +89,7 @@ export function TiendaInicio({ ctrl }) {
           <li>· Los pedidos entran a <span className="text-paper">Ventas → Delivery</span> o <span className="text-paper">Mostrador</span> según la modalidad.</li>
           <li>· Al aceptar se imprime la comanda {a.imprimir_al_aceptar ? 'automáticamente' : '(desactivado)'}.</li>
           <li>· El aviso al cliente sale por WhatsApp desde el equipo del local.</li>
-          <li>· El 10% de descuento por efectivo se aplica en el carrito y en la comanda.</li>
+          <li>· El 10% de descuento por efectivo se aplica <span className="text-paper">solo en los pedidos para retirar</span>, en el carrito y en el mostrador.</li>
         </ul>
       </Tarjeta>
     </>

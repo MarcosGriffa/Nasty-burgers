@@ -128,7 +128,7 @@ export default function Hero() {
             </div>
 
             <p className="mt-6 text-xs font-bold uppercase tracking-[0.18em] text-ink/60">
-              10% OFF abonando en efectivo
+              10% OFF en efectivo retirando por el local
             </p>
           </div>
         </div>

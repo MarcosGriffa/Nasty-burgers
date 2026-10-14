@@ -1,4 +1,6 @@
-import { TODOS_LOS_ITEMS } from '../data/negocio'
+import { NEGOCIO, TODOS_LOS_ITEMS } from '../data/negocio'
+import { COSTO_ENVIO } from '../data/semillas'
+import { descuentoPorEfectivo } from './cobros'
 import { nombreCompleto } from './utils'
 
 // Comandas de ejemplo para ver el panel funcionando sin tener que cargar
@@ -178,8 +180,13 @@ export function historialDemo(dias = 60) {
 
       const subtotal = items.reduce((a, x) => a + x.precio * x.cantidad, 0)
       const pago = PAGOS[Math.floor(r() * PAGOS.length)]
-      const descuento = pago === 'efectivo' ? Math.round(subtotal * 0.1) : 0
+      // La modalidad se decide antes que la plata, porque de ella dependen las
+      // dos cuentas: el descuento por efectivo (solo take away) y el envío. Los
+      // pedidos de ejemplo tienen que seguir las mismas reglas que los reales,
+      // si no el reporte del mes de ejemplo no se parece al de verdad.
       const modalidad = r() < 0.62 ? 'delivery' : 'retiro'
+      const descuento = descuentoPorEfectivo(subtotal, pago, modalidad, NEGOCIO.promoEfectivo)
+      const envio = modalidad === 'delivery' ? COSTO_ENVIO : 0
       const nombre = `${NOMBRES[Math.floor(r() * NOMBRES.length)]} ${APELLIDOS[Math.floor(r() * APELLIDOS.length)]}`
 
       numero += 1
@@ -200,7 +207,8 @@ export function historialDemo(dias = 60) {
         items,
         subtotal,
         descuento,
-        total: subtotal - descuento,
+        envio,
+        total: subtotal - descuento + envio,
         pago,
         estado: 'entregado',
         demora_min: [20, 25, 30, 40, 45][Math.floor(r() * 5)],
