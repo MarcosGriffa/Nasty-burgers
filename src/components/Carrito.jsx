@@ -69,6 +69,9 @@ export default function Carrito({
   const { abierto, motivo, cerradoDelTodo, costoEnvio, montoMinimo } = useTienda(modalidad)
 
   const local = LOCALES.find((l) => l.id === localId) ?? null
+  // Mientras el carrito esté vacío no se cobra el envío ni se muestra: ver
+  // «Total $3.000» sin haber agregado nada es un precio que no existe.
+  const hayPedido = unidades > 0
   // Con delivery la tarjeta no se muestra: el posnet queda en el local, el
   // repartidor no lo lleva. Y si el cliente ya la había elegido y después se
   // pasa a delivery, la elección se cae sola: guardar el pedido con un medio
@@ -80,9 +83,10 @@ export default function Carrito({
   // El cliente eligió efectivo pero pidió delivery: hay que avisarle ahí mismo,
   // no dejar que se entere mirando un total que no baja.
   const efectivoSinDescuento = pagoVigente === 'efectivo' && modalidad === 'delivery'
-  const envio = modalidad === 'delivery' ? costoEnvio : 0
+  const envio = modalidad === 'delivery' && hayPedido ? costoEnvio : 0
   const total = subtotal - descuento + envio
 
+  const faltaModalidad = !modalidad
   const faltaNombre = nombre.trim().length < 2
   const faltaTelefono = soloDigitos(telefono).length < 8
   const faltaDireccion = modalidad === 'delivery' && direccion.trim().length < 5
@@ -92,6 +96,7 @@ export default function Carrito({
     unidades > 0 &&
     abierto &&
     !faltaMinimo &&
+    !faltaModalidad &&
     !faltaLocal &&
     !faltaNombre &&
     !faltaTelefono &&
@@ -449,7 +454,7 @@ export default function Carrito({
             <span>−{pesos(descuento)}</span>
           </div>
         )}
-        {modalidad === 'delivery' && (
+        {modalidad === 'delivery' && hayPedido && (
           <div className="mb-1 flex justify-between text-sm text-ash">
             <span>Envío</span>
             <span>{envio === 0 ? 'sin cargo' : pesos(envio)}</span>
@@ -492,7 +497,9 @@ export default function Carrito({
           <p className="mt-2 text-center text-xs text-flame">
             {faltaMinimo
               ? `El pedido mínimo es de ${pesos(montoMinimo)}.`
-              : faltaLocal
+              : faltaModalidad
+                ? '¿Te lo llevamos o lo buscás vos?'
+                : faltaLocal
                 ? 'Elegí de qué local lo querés.'
                 : faltaNombre
                   ? 'Escribí tu nombre.'

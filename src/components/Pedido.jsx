@@ -81,7 +81,10 @@ function ItemCard({ item, cantidad, onAgregar, onQuitar, indice = 0, promo = nul
 }
 
 export default function Pedido({ carrito, drawerAbierto, setDrawerAbierto }) {
-  const [modalidad, setModalidad] = useState('delivery')
+  // Arranca SIN elegir. Antes venía con 'delivery' puesto, y eso le sumaba
+  // $3.000 al total de alguien que todavía no había dicho si quería envío o si
+  // lo pasaba a buscar. Un precio que el cliente no eligió no se muestra.
+  const [modalidad, setModalidad] = useState(null)
   // arranca sin elegir: el cliente lo decide en el carrito, antes de confirmar
   const [localId, setLocalId] = useState(null)
   const [busqueda, setBusqueda] = useState('')

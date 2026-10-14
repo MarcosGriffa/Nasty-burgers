@@ -114,8 +114,11 @@ export function comisiones(pedidos = [], medios = []) {
 // cambia acá y cambia en los tres lados el mismo día.
 
 /** ¿A este pedido le corresponde el descuento por efectivo? */
+// Se pide 'retiro' explícito y no "cualquier cosa que no sea delivery": en la
+// web el cliente arranca sin haber elegido, y en ese momento no corresponde
+// mostrarle un descuento que después le puede desaparecer.
 export const aplicaDescuentoEfectivo = (pago, modalidad) =>
-  pago === 'efectivo' && modalidad !== 'delivery'
+  pago === 'efectivo' && modalidad === 'retiro'
 
 /**
  * Lo que se le descuenta al pedido por pagar en efectivo, en pesos.

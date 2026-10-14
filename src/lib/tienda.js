@@ -60,7 +60,10 @@ export function estadoDeTienda(ajustes, modalidad = 'delivery', fecha = new Date
   const ahora = fecha.getHours() * 60 + fecha.getMinutes()
   const hoy = horarios[indiceDia(fecha)]
   const ayer = horarios[(indiceDia(fecha) + 6) % 7]
-  const habilita = (h) => (modalidad === 'retiro' ? h?.retiro : h?.delivery)
+  // Sin modalidad elegida todavía no se puede decir "el delivery está cerrado":
+  // alcanza con que sirva alguna de las dos para que el cliente pueda seguir.
+  const habilita = (h) =>
+    modalidad === 'retiro' ? h?.retiro : modalidad === 'delivery' ? h?.delivery : h?.retiro || h?.delivery
 
   if (habilita(hoy) && dentroDelTurno(ahora, hoy.desde, hoy.hasta)) {
     return { abierto: true, motivo: null }
@@ -73,7 +76,9 @@ export function estadoDeTienda(ajustes, modalidad = 'delivery', fecha = new Date
   const texto =
     modalidad === 'retiro'
       ? 'El local está cerrado para retirar'
-      : 'El delivery está cerrado'
+      : modalidad === 'delivery'
+        ? 'El delivery está cerrado'
+        : 'Ahora estamos cerrados'
   const cuando = habilita(hoy)
     ? `Hoy abrimos de ${hoy.desde} a ${hoy.hasta}.`
     : `${proximoDia(horarios, fecha, modalidad)}`
