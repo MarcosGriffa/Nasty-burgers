@@ -217,7 +217,12 @@ export default function Pedido({ carrito, drawerAbierto, setDrawerAbierto }) {
 
           {/* carrito fijo en desktop */}
           <aside className="hidden lg:block">
-            <div className="sticky top-28 max-h-[calc(100svh-8rem)]">
+            {/* El panel se queda pegado y NUNCA más alto que la pantalla: es
+                flex en columna para que la lista de adentro sea la que scrollea
+                y el total con el botón de confirmar queden siempre a la vista.
+                Antes solo tenía max-height y el carrito largo se cortaba abajo:
+                había que bajar toda la página y el botón no aparecía nunca. */}
+            <div className="sticky top-28 flex max-h-[calc(100svh-8rem)] flex-col">
               <Carrito
                 carrito={carrito}
                 modalidad={modalidad}
@@ -258,7 +263,7 @@ export default function Pedido({ carrito, drawerAbierto, setDrawerAbierto }) {
       {/* drawer del carrito en mobile */}
       {drawerAbierto && (
         <div className="fixed inset-0 z-50 bg-ink/80 p-3 backdrop-blur-sm lg:hidden">
-          <div className="mx-auto h-full max-w-md">
+          <div className="mx-auto flex h-full max-w-md flex-col">
             <Carrito
               carrito={carrito}
               modalidad={modalidad}

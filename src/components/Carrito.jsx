@@ -137,7 +137,7 @@ export default function Carrito({
   // --------------------------------------------------------------- confirmado
   if (confirmado) {
     return (
-      <div className="flex h-full flex-col justify-center rounded-3xl border border-amber/40 bg-ink-2 p-6 text-center">
+      <div className="flex min-h-0 flex-1 flex-col justify-center rounded-3xl border border-amber/40 bg-ink-2 p-6 text-center">
         <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-amber">
           <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="#0B0B0B" strokeWidth="3">
             <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
@@ -176,7 +176,7 @@ export default function Carrito({
 
   // ------------------------------------------------------------------ carrito
   return (
-    <div className="flex h-full flex-col rounded-3xl border border-white/10 bg-ink-2">
+    <div className="flex min-h-0 flex-1 flex-col rounded-3xl border border-white/10 bg-ink-2">
       <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
         <h3 className="display text-xl text-paper">
           Tu pedido{' '}

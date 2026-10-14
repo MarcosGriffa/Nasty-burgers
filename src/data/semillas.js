@@ -185,8 +185,13 @@ export const PRODUCTOS = [
       proveedor: '',
       // Toda hamburguesa es un combo: viene con papas y el cliente elige el
       // tipo. Los demás grupos son opcionales.
+      // Sin el grupo «Sin qué» a propósito (Marcos, 14/10): era una sola lista
+      // pegada igual a todas las hamburguesas, así que la Critical ofrecía
+      // sacarle pepinillos, tomate, mayonesa y ketchup, que no lleva. El que
+      // quiere sacar algo lo escribe en la nota del pedido, que ya llega a la
+      // comanda.
       modificadores: receta.some((r) => r.ingrediente === 'Papas fritas')
-        ? ['Papas', 'Punto de la carne', 'Extras', 'Sin qué']
+        ? ['Papas', 'Punto de la carne', 'Extras']
         : [],
     }
   }),
@@ -250,19 +255,6 @@ export const GRUPOS_MODIFICADORES = [
       { nombre: 'Cheddar x2', precio: 1500, ingrediente: 'Cheddar en fetas', cantidad: 2 },
       { nombre: 'Medallón + cheddar', precio: 4700, ingrediente: 'Medallón 120 g', cantidad: 1 },
       { nombre: 'Cebolla crispy', precio: 1200, ingrediente: 'Cebolla crispy', cantidad: 20 },
-    ],
-  },
-  {
-    nombre: 'Sin qué',
-    bajada: 'Si hay algo que no te va, marcalo.',
-    minimo: 0,
-    maximo: 5,
-    opciones: [
-      { nombre: 'Sin cebolla', precio: 0 },
-      { nombre: 'Sin pepinillos', precio: 0 },
-      { nombre: 'Sin tomate', precio: 0 },
-      { nombre: 'Sin mayonesa', precio: 0 },
-      { nombre: 'Sin ketchup', precio: 0 },
     ],
   },
 ]
