@@ -295,6 +295,52 @@ export async function eliminar(nombre, id) {
   if (error) throw error
 }
 
+// ---------------------------------------------------------------------------
+// Un canal por tabla, compartido
+//
+// Acá había un bug que apagaba la aplicación entera con la base conectada:
+// cada pantalla pedía su propio canal con el MISMO nombre («col-productos»), y
+// Supabase, cuando le pedís un canal con un nombre que ya existe, te devuelve
+// el que ya tenía. Dos pantallas mirando la misma tabla terminaban con el mismo
+// canal, y la primera en cerrarse se lo llevaba puesto a la otra: pantalla en
+// negro.
+//
+// Ahora hay UN estado por tabla, con sus oyentes, su canal y su lectura en
+// curso. El canal se crea con la primera pantalla y se da de baja recién
+// cuando se va la última. Y los errores de la base ya no se tragan en
+// silencio: viajan hasta el hook, que los muestra.
+// ---------------------------------------------------------------------------
+
+const vivas = new Map()
+let nCanal = 0
+
+const estadoDe = (nombre) => {
+  let e = vivas.get(nombre)
+  if (!e) {
+    e = { oyentes: new Set(), estado: null, canal: null, trayendo: null }
+    vivas.set(nombre, e)
+  }
+  return e
+}
+
+/** Relee la tabla. Si ya hay una lectura en curso, se cuelga de esa. */
+function traerTabla(nombre) {
+  const v = estadoDe(nombre)
+  v.trayendo ||= (async () => {
+    const { data, error } = await supabase.from(nombre).select('*')
+    v.trayendo = null
+    if (!vivas.has(nombre)) return // se dio de baja mientras leíamos
+    if (error) {
+      console.error(`No pude leer «${nombre}» de la base:`, error)
+      v.estado = { filas: [], error }
+    } else {
+      v.estado = { filas: data ?? [], error: null }
+    }
+    v.oyentes.forEach((fn) => fn(v.estado.filas, v.estado.error))
+  })()
+  return v.trayendo
+}
+
 export function suscribir(nombre, alCambiar, semilla) {
   // colección vacía: se usa cuando una pantalla no necesita datos relacionados
   if (!nombre || nombre === 'noop') {
@@ -312,19 +358,26 @@ export function suscribir(nombre, alCambiar, semilla) {
     return () => oyentes.get(nombre)?.delete(emitir)
   }
 
-  let vivo = true
-  const traer = async () => {
-    const { data, error } = await supabase.from(nombre).select('*')
-    if (!error && vivo) alCambiar(data ?? [])
-  }
-  traer()
-  const rt = supabase
-    .channel(`col-${nombre}`)
-    .on('postgres_changes', { event: '*', schema: 'public', table: nombre }, traer)
+  const v = estadoDe(nombre)
+  v.oyentes.add(alCambiar)
+  // si otra pantalla ya leyó esta tabla, esta arranca con los datos puestos
+  if (v.estado) alCambiar(v.estado.filas, v.estado.error)
+
+  v.canal ||= supabase
+    .channel(`col-${nombre}-${++nCanal}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: nombre }, () =>
+      traerTabla(nombre),
+    )
     .subscribe()
+
+  traerTabla(nombre)
+
   return () => {
-    vivo = false
-    supabase.removeChannel(rt)
+    v.oyentes.delete(alCambiar)
+    if (v.oyentes.size === 0) {
+      if (v.canal) supabase.removeChannel(v.canal)
+      vivas.delete(nombre)
+    }
   }
 }
 
@@ -344,13 +397,18 @@ export function reemplazarDemo(nombre, filas) {
 export function useColeccion(nombre, semilla) {
   const [filas, setFilas] = useState([])
   const [cargando, setCargando] = useState(true)
+  // si la base contesta mal, la pantalla tiene que poder decirlo en vez de
+  // quedarse cargando para siempre
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     setCargando(true)
+    setError(null)
     const baja = suscribir(
       nombre,
-      (f) => {
+      (f, err) => {
         setFilas(f)
+        setError(err ?? null)
         setCargando(false)
       },
       semilla,
@@ -363,6 +421,7 @@ export function useColeccion(nombre, semilla) {
   return {
     filas,
     cargando,
+    error,
     crear: (d) => crear(nombre, d),
     actualizar: (id, c) => actualizar(nombre, id, c),
     eliminar: (id) => eliminar(nombre, id),

@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useColeccion } from './almacen'
 import { CAT_PRODUCTOS, GRUPOS_MODIFICADORES, INGREDIENTES, PRODUCTOS } from '../data/semillas'
+import { esCombo, precioConPromo } from './promos'
 
 /**
  * El menú que ve el cliente sale de la MISMA tabla de productos que edita el
@@ -71,7 +72,7 @@ const slug = (s) =>
  * subcategorías (Simple / Doble / Triple) se abren en una sección por cada una,
  * igual que en la carta de hoy.
  */
-export function armarMenu(productos, categorias, ingredientes) {
+export function armarMenu(productos, categorias, ingredientes, fecha = new Date()) {
   const activos = productos.filter((p) => p.activo !== false && p.visible_web !== false)
   const orden = new Map(categorias.map((c, i) => [c.nombre, i]))
 
@@ -88,13 +89,22 @@ export function armarMenu(productos, categorias, ingredientes) {
     (a, b) => (orden.get(a[0]) ?? 99) - (orden.get(b[0]) ?? 99),
   )
 
-  const item = (p) => ({
+  // La promo del día se aplica ACÁ y en ningún otro lado: el precio que sale de
+  // esta función es el que ve el cliente, el que se cobra, el que se guarda en
+  // el pedido y el que sale en la comanda.
+  const item = (p) => {
+    const precioLista = Number(p.precio) || 0
+    const precio = precioConPromo(p, precioLista, fecha)
+    return {
     id: p.id,
     codigo: p.codigo,
     nombre: p.nombre,
     nombreCorto: nombreCorto(p.nombre, p.subcategoria),
     desc: descripcionDe(p, ingredientes),
-    precio: Number(p.precio) || 0,
+    precio,
+    precioLista,
+    enPromo: precio < precioLista,
+    combo: esCombo(p),
     img: p.img,
     destacado: !!p.destacado,
     promo: !!p.promo,
@@ -102,7 +112,8 @@ export function armarMenu(productos, categorias, ingredientes) {
     categoriaNombre: p.categoria,
     subcategoria: p.subcategoria,
     modificadores: p.modificadores ?? [],
-  })
+    }
+  }
 
   catsOrdenadas.forEach(([nombreCat, lista]) => {
     const conSub = lista.filter((p) => SUBCATS.includes(p.subcategoria))

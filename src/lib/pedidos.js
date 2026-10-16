@@ -125,6 +125,8 @@ export async function actualizarPedido(id, cambios) {
  */
 export const VENTANA_DIAS = 300
 
+let nCanalPedidos = 0
+
 export function suscribirPedidos(alCambiar) {
   if (modoDemo) {
     const emitir = () => alCambiar(leerDemo())
@@ -161,8 +163,11 @@ export function suscribirPedidos(alCambiar) {
   }
 
   traer()
+  // el nombre lleva un número: si dos pantallas piden «pedidos-panel» a secas,
+  // Supabase devuelve el canal que ya existe y la primera que cierra se lo
+  // lleva puesto (es el mismo bug que había en almacen.js)
   const canalRt = supabase
-    .channel('pedidos-panel')
+    .channel(`pedidos-panel-${++nCanalPedidos}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, traer)
     .subscribe()
 
