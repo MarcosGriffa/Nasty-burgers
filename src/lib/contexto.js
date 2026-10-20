@@ -68,7 +68,14 @@ function bloqueVentas(pedidos, productos, gastos, medios, dias, titulo) {
   ].join('\n')
 }
 
-export function contextoDelNegocio({
+/**
+ * Los NÚMEROS del negocio, para que la IA conteste preguntas del encargado.
+ * No confundir con `contextoDeLaCarta` de asistente.js, que arma la carta para
+ * EDITAR precios y recetas: no son intercambiables, reciben cosas distintas, y
+ * enganchar la equivocada no rompe el build — se vería recién con el asistente
+ * contestando cualquier cosa delante del encargado.
+ */
+export function numerosDelNegocio({
   pedidos = [],
   productos = [],
   ingredientes = [],

@@ -331,6 +331,9 @@ export const MEDIOS_PAGO = [
   // la ganancia neta, que es justo lo que se arregló en T1.4 y T1.8.
   { nombre: 'Efectivo', tipo: 'Efectivo', clave: 'efectivo', comision: 0, activo: true },
   { nombre: 'Tarj. Débito', tipo: 'Tarjeta', clave: 'tarjeta', comision: 0, activo: true },
+  // Débito y crédito se cuentan por separado al cerrar la caja (Marcos, 20/10).
+  // El 0 % sale de D6: al local no le cobran arancel por tarjeta.
+  { nombre: 'Tarj. Crédito', tipo: 'Tarjeta', clave: 'credito', comision: 0, activo: true },
   { nombre: 'Mercado Pago', tipo: 'Online', clave: 'mercadopago', comision: 3.5, activo: true },
   { nombre: 'Transferencia', tipo: 'Bancario', clave: 'transferencia', comision: 0, activo: true },
   // El QR SÍ tiene clave: lo cobra el empleado en el mostrador y lo marca como

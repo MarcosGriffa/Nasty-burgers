@@ -85,3 +85,22 @@ test('la tarjeta cobra 0 % y NO figura como sin asignar', () => {
   assert.equal(fila.comision, 0)
   assert.equal(fila.neto, 46000)
 })
+
+test('debito y credito se cuentan por separado', () => {
+  // Marcos los cierra por separado en la caja, asi que son dos medios.
+  const pedidos = [
+    { pago: 'tarjeta', total: 10000 },
+    { pago: 'credito', total: 7000 },
+  ]
+  const d = comisiones(pedidos, MEDIOS_PAGO)
+  const debito = d.filas.find((f) => f.clave === 'tarjeta')
+  const credito = d.filas.find((f) => f.clave === 'credito')
+  assert.equal(debito.medio, 'Tarj. Débito')
+  assert.equal(credito.medio, 'Tarj. Crédito')
+  assert.equal(d.brutoSinAsignar, 0, 'ninguna de las dos queda sin asignar')
+})
+
+test('los pedidos viejos que dicen "tarjeta" siguen enganchando con el debito', () => {
+  // Cambiar la clave a 'debito' habria dejado todas esas ventas huerfanas.
+  assert.equal(medioDe(MEDIOS_PAGO, 'tarjeta')?.nombre, 'Tarj. Débito')
+})

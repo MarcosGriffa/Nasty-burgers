@@ -11,6 +11,7 @@ import { MENSAJES } from '../data/negocio'
 import { linkWhatsapp, telefonoWhatsapp } from '../lib/utils'
 import { actualizar as actualizarFila, suscribir } from '../lib/almacen'
 import { cantidadBruta } from '../lib/menu'
+import { lineasHuerfanas, productoDeLinea } from '../lib/catalogo'
 import { INGREDIENTES, PRODUCTOS } from '../data/semillas'
 
 function beep() {
@@ -57,7 +58,7 @@ async function descontarStock(pedido, productos, ingredientes) {
     gasto.set(ingrediente, (gasto.get(ingrediente) || 0) + cantidad)
 
   ;(pedido.items || []).forEach((linea) => {
-    const prod = productos.find((p) => p.nombre === linea.nombre)
+    const prod = productoDeLinea(linea, productos)
     if (!prod?.controlar_stock || !prod.receta?.length) return
     prod.receta.forEach((r) => sumar(r.ingrediente, cantidadBruta(r) * linea.cantidad))
 
@@ -82,6 +83,9 @@ export function usePedidos() {
   const productos = useRef([])
   const ingredientes = useRef([])
   const [sonido, setSonido] = useState(() => leerPref('nasty.sonido', true))
+  // { numero, productos: [...] } cuando una comanda tiene lineas que no se
+  // pudieron cruzar con la carta. La pantalla lo muestra y lo deja descartar.
+  const [avisoStock, setAvisoStock] = useState(null)
   const conocidos = useRef(null)
 
   useEffect(() => suscribirPedidos(setTodos), [])
@@ -144,6 +148,14 @@ export function usePedidos() {
       imprimirComandaCocina({ ...pedido, estado: 'preparando', demora_min: minutos })
     }
     if (!pedido.stock_descontado) {
+      // Si alguna línea no se pudo cruzar con un producto de la carta, el stock
+      // de esa línea NO se descuenta. Eso antes pasaba callado: el encargado
+      // aceptaba la comanda, veía todo normal, y el inventario quedaba mal.
+      // Ahora se lo decimos, con el nombre de lo que no se pudo cruzar.
+      const huerfanas = lineasHuerfanas(pedido.items, productos.current)
+      if (huerfanas.length) {
+        setAvisoStock({ numero: pedido.numero, productos: huerfanas })
+      }
       descontarStock(pedido, productos.current, ingredientes.current)
     }
     return actualizarPedido(pedido.id, {
@@ -170,5 +182,16 @@ export function usePedidos() {
     [],
   )
 
-  return { pedidos, local, sonido, setSonido, aceptar, rechazar, avanzar, cobrar }
+  return {
+    pedidos,
+    local,
+    sonido,
+    setSonido,
+    aceptar,
+    rechazar,
+    avanzar,
+    cobrar,
+    avisoStock,
+    descartarAvisoStock: () => setAvisoStock(null),
+  }
 }

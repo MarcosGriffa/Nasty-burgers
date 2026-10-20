@@ -120,6 +120,9 @@ export default function Carrito({
         nota: nota.trim() || null,
         items: lineas.map((li) => ({
           id: li.item.id,
+          // El código es lo único que no cambia si el local renombra el
+          // producto: sin esto, renombrar corta el descuento de stock.
+          codigo: li.item.codigo ?? null,
           nombre: nombreCompleto(li.item),
           cantidad: li.cantidad,
           precio: precioConOpciones(li.item, li.opciones),

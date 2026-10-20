@@ -33,7 +33,11 @@ export const CLAVES_PAGO = [
   { clave: 'efectivo', label: 'Efectivo' },
   { clave: 'mercadopago', label: 'Mercado Pago' },
   { clave: 'transferencia', label: 'Transferencia' },
-  { clave: 'tarjeta', label: 'Tarjeta' },
+  // `tarjeta` es el débito. Se deja con ese nombre de clave —y no `debito`—
+  // porque los pedidos que ya están guardados dicen 'tarjeta': cambiarla
+  // dejaría esas ventas sin medio asignado.
+  { clave: 'tarjeta', label: 'Tarj. Débito' },
+  { clave: 'credito', label: 'Tarj. Crédito' },
   { clave: 'qr', label: 'Mercado Pago QR' },
 ]
 

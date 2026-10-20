@@ -47,7 +47,14 @@ function NuevoPedido({ modalidad, onCerrar }) {
       if (ya) return prev.map((x) => (x.id === i.id ? { ...x, cantidad: x.cantidad + 1 } : x))
       return [
         ...prev,
-        { id: i.id, nombre: i.etiqueta, cantidad: 1, precio: i.precio, categoriaId: i.categoriaId },
+        {
+          id: i.id,
+          codigo: i.codigo ?? null,
+          nombre: i.etiqueta,
+          cantidad: 1,
+          precio: i.precio,
+          categoriaId: i.categoriaId,
+        },
       ]
     })
 
@@ -55,7 +62,7 @@ function NuevoPedido({ modalidad, onCerrar }) {
   // En delivery la tarjeta no es una opción: el posnet queda en el local. Si el
   // empleado la había elegido y después pasa el pedido a delivery, la elección
   // se cae sola en vez de guardar un medio que el repartidor no puede cobrar.
-  const SOLO_EN_EL_LOCAL = ['tarjeta', 'qr']
+  const SOLO_EN_EL_LOCAL = ['tarjeta', 'credito', 'qr']
   const pagoVigente =
     modalidad === 'delivery' && SOLO_EN_EL_LOCAL.includes(pago) ? 'efectivo' : pago
 
@@ -164,6 +171,7 @@ function NuevoPedido({ modalidad, onCerrar }) {
                 {/* Ninguna de las dos va en delivery: el posnet y el QR del
                     local quedan en el mostrador, el repartidor no los lleva. */}
                 {modalidad !== 'delivery' && <option value="tarjeta">Tarj. Débito</option>}
+                {modalidad !== 'delivery' && <option value="credito">Tarj. Crédito</option>}
                 {modalidad !== 'delivery' && <option value="qr">Mercado Pago QR</option>}
               </select>
               <select value={local} onChange={(e) => setLocal(e.target.value)} className={input}>

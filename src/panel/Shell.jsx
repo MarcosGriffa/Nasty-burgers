@@ -257,6 +257,26 @@ export default function Shell() {
         </div>
       )}
 
+      {/* Una comanda que no se pudo cruzar con la carta: el stock de esas
+          líneas NO se descontó. Va arriba de todo y no se va solo, porque es
+          plata de inventario que alguien tiene que ajustar a mano. */}
+      {ctrl.avisoStock && (
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-flame/40 bg-flame/15 px-4 py-3 text-xs text-flame">
+          <span className="min-w-0">
+            <strong>Comanda #{ctrl.avisoStock.numero}:</strong> no encontré en la carta{' '}
+            {ctrl.avisoStock.productos.map((n) => `«${n}»`).join(', ')}. Esas líneas{' '}
+            <strong>no descontaron stock</strong> — revisá el inventario a mano.
+          </span>
+          <button
+            type="button"
+            onClick={ctrl.descartarAvisoStock}
+            className="shrink-0 rounded-full border border-flame/50 px-3 py-1 font-extrabold uppercase tracking-widest hover:bg-flame/20"
+          >
+            Entendido
+          </button>
+        </div>
+      )}
+
       {/* sub-navegación */}
       {!lateral && (
         <nav className="no-scrollbar sticky top-[52px] z-30 flex gap-1 overflow-x-auto border-b border-white/10 bg-ink-2 px-3 sm:px-4">

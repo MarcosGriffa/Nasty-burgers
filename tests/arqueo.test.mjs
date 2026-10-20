@@ -80,3 +80,28 @@ test('un pedido de antes de abrir la caja no entra', () => {
   const s = calcularArqueo(arqueo, [viejo], [], MEDIOS_PAGO)
   assert.equal(s.ventas, 0)
 })
+
+test('cada tarjeta cae en su propia fila', () => {
+  const pedidos = [
+    ped(10000, 'tarjeta', 'Mostrador'),
+    ped(7000, 'credito', 'Mostrador'),
+    ped(5000, 'qr', 'Mostrador'),
+  ]
+  const s = calcularArqueo(arqueo, pedidos, [], MEDIOS_PAGO)
+  assert.equal(s.porMedio['Tarj. Débito'], 10000)
+  assert.equal(s.porMedio['Tarj. Crédito'], 7000)
+  assert.equal(s.porMedio['Mercado Pago QR'], 5000)
+  assert.equal(s.porMedio['Efectivo'], 0)
+})
+
+test('lo recaudado por forma de cobro suma lo mismo que las ventas', () => {
+  const pedidos = [
+    ped(10000, 'efectivo', 'Mostrador'),
+    ped(7000, 'credito', 'Mostrador'),
+    ped(5000, 'qr', 'Mostrador'),
+    ped(8000, 'efectivo', 'Pedidos Ya'),
+  ]
+  const s = calcularArqueo(arqueo, pedidos, [], MEDIOS_PAGO)
+  const suma = Object.values(s.porMedio).reduce((a, v) => a + v, 0)
+  assert.equal(suma, s.ventas, 'no se pierde ni se duplica ninguna venta')
+})

@@ -2,6 +2,7 @@
 // los pedidos reales, no hay números escritos a mano en las pantallas.
 
 import { CATEGORIAS } from '../data/negocio'
+import { productoDeLinea } from './catalogo'
 import { comisiones, etiquetaPago } from './cobros'
 
 const NOMBRE_CAT = Object.fromEntries(CATEGORIAS.map((c) => [c.id, c.nombre]))
@@ -136,7 +137,13 @@ export function porDiaSemana(pedidos) {
 
 /** Ranking de productos con costo, CMV y markup. */
 export function rankingProductos(pedidos, productos = []) {
-  const costoDe = new Map(productos.map((p) => [p.nombre, Number(p.costo) || 0]))
+  // El costo se busca con el mismo cruce que el stock: por código primero. Si
+  // se buscara por nombre, renombrar un producto haría que el costo se
+  // inventara como el 25 % del precio y el margen saliera de fantasía.
+  const costoDeLinea = (i) => {
+    const prod = productoDeLinea(i, productos)
+    return prod ? Number(prod.costo) || 0 : null
+  }
   const mapa = new Map()
   pedidos.forEach((p) =>
     (p.items || []).forEach((i) => {
@@ -149,7 +156,7 @@ export function rankingProductos(pedidos, productos = []) {
       }
       e.cantidad += i.cantidad
       e.venta += i.precio * i.cantidad
-      e.costo += (costoDe.get(i.nombre) ?? Math.round(i.precio * 0.25)) * i.cantidad
+      e.costo += (costoDeLinea(i) ?? Math.round(i.precio * 0.25)) * i.cantidad
       mapa.set(i.nombre, e)
     }),
   )
@@ -269,11 +276,11 @@ export function clientesDePedidos(pedidos) {
 
 /** Consumo de ingredientes, según la receta cargada en cada producto. */
 export function consumoIngredientes(pedidos, productos) {
-  const porNombre = new Map(productos.map((p) => [p.nombre, p.receta || []]))
+  const recetaDeLinea = (i) => productoDeLinea(i, productos)?.receta || null
   const mapa = new Map()
   pedidos.forEach((p) =>
     (p.items || []).forEach((i) => {
-      const receta = porNombre.get(i.nombre)
+      const receta = recetaDeLinea(i)
       if (!receta?.length) return
       receta.forEach((r) => {
         const bruta = (Number(r.neta) || 0) * (1 + (Number(r.merma) || 0) / 100)

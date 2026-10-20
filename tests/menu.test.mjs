@@ -74,3 +74,11 @@ test('dentro de la seccion "Dobles" la Nasty Doble se llama Nasty', () => {
 test('una carta vacia no rompe nada', () => {
   assert.deepEqual(armarMenu([], [], [], MARTES), [])
 })
+
+test('cada item de la carta lleva su codigo', () => {
+  // De aca lo copia la linea del pedido. Sin codigo en la carta, renombrar un
+  // producto vuelve a cortar el descuento de stock.
+  const items = carta(MARTES).flatMap((s) => s.items)
+  const sinCodigo = items.filter((i) => !i.codigo)
+  assert.deepEqual(sinCodigo.map((i) => i.nombre), [], 'todos tienen que tener codigo')
+})

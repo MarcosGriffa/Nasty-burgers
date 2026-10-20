@@ -257,13 +257,13 @@ export function Arqueos({ ctrl }) {
       {abriendo && (
         <Modal
           titulo="Nuevo arqueo de caja"
-          bajada="Lo único que hace falta es con cuánto efectivo arrancás."
+          bajada="Lo único que hace falta es con cuánto efectivo arranca el día."
           onCerrar={() => setAbriendo(false)}
           ancho="max-w-md"
         >
           <label className="block">
             <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-widest text-ash">
-              Monto inicial en efectivo *
+              ¿Con cuánto efectivo empieza el día? *
             </span>
             <input
               type="number"
@@ -315,7 +315,7 @@ export function Arqueos({ ctrl }) {
       {cerrando && (
         <Modal
           titulo="Cerrar caja"
-          bajada={`Caja ${cerrando.caja} — cargá cuánto contaste de cada forma de cobro.`}
+          bajada={`Caja ${cerrando.caja} — al lado de cada forma de cobro está lo recaudado; cargá lo que contaste.`}
           onCerrar={() => setCerrando(null)}
           ancho="max-w-xl"
         >
@@ -348,7 +348,7 @@ export function Arqueos({ ctrl }) {
                 </p>
                 <div className="mb-1 grid grid-cols-[1fr_auto_8rem] gap-3 text-[10px] font-extrabold uppercase tracking-wider text-ash">
                   <span>Forma de cobro</span>
-                  <span className="w-24 text-right">Sistema</span>
+                  <span className="w-24 text-right">Recaudado</span>
                   <span className="text-right">Contaste</span>
                 </div>
                 <div className="space-y-2">

@@ -4,7 +4,7 @@ import { PRODUCTOS, DESCUENTOS, INGREDIENTES, GRUPOS_MODIFICADORES } from '../..
 import {
   camposDelCambio,
   camposParaDeshacer,
-  contextoDelNegocio,
+  contextoDeLaCarta,
   describir,
   esDePrecio,
   interpretarIA,
@@ -68,7 +68,7 @@ export default function Asistente() {
     try {
       const p = await interpretarIA(
         consulta,
-        contextoDelNegocio(productos, descuentos, ingredientes, grupos),
+        contextoDeLaCarta(productos, descuentos, ingredientes, grupos),
       )
       if (p.operacion === 'ninguna') {
         setError(p.aclaracion || 'No entendí el pedido. Probá diciéndolo de otra forma.')

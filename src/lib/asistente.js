@@ -394,7 +394,12 @@ export function interpretarLocal(texto, productos, catalogo = {}) {
  * Contexto que se le manda al modelo. Es corto a propósito: cuanto menos
  * texto, más barato y más difícil que se distraiga.
  */
-export function contextoDelNegocio(productos, descuentos = [], ingredientes = [], grupos = []) {
+/**
+ * LA CARTA, para que la IA pueda editar precios, promos y recetas.
+ * No confundir con `numerosDelNegocio` de contexto.js, que arma la plata y el
+ * stock para CONTESTAR preguntas. Ver el comentario de allá.
+ */
+export function contextoDeLaCarta(productos, descuentos = [], ingredientes = [], grupos = []) {
   const porCategoria = new Map()
   productos.forEach((p) => {
     const k = p.categoria || 'Sin categoría'

@@ -172,6 +172,7 @@ delete from public.medios_pago;
 insert into public.medios_pago (nombre, tipo, clave, comision, activo, origen, fuera_de_caja) values
   ('Efectivo', 'Efectivo', 'efectivo', 0, true, null, null),
   ('Tarj. Débito', 'Tarjeta', 'tarjeta', 0, true, null, null),
+  ('Tarj. Crédito', 'Tarjeta', 'credito', 0, true, null, null),
   ('Mercado Pago', 'Online', 'mercadopago', 3.5, true, null, null),
   ('Transferencia', 'Bancario', 'transferencia', 0, true, null, null),
   ('Mercado Pago QR', 'Online', 'qr', null, true, null, null),

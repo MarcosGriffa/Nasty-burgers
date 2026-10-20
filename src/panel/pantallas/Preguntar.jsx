@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useColeccion } from '../../lib/almacen'
 import { PRODUCTOS, INGREDIENTES, GASTOS, MEDIOS_PAGO } from '../../data/semillas'
-import { contextoDelNegocio } from '../../lib/contexto'
+import { numerosDelNegocio } from '../../lib/contexto'
 import { hayIA, preguntarAGemini } from '../../lib/ia'
 import { Boton, Encabezado, Tarjeta } from '../comp/ui'
 
@@ -72,7 +72,7 @@ export default function Preguntar({ ctrl }) {
     setPensando(true)
 
     try {
-      const contexto = contextoDelNegocio({
+      const contexto = numerosDelNegocio({
         pedidos: ctrl.pedidos,
         productos,
         ingredientes,
