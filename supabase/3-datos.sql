@@ -173,8 +173,8 @@ insert into public.medios_pago (nombre, tipo, clave, comision, activo, origen, f
   ('Efectivo', 'Efectivo', 'efectivo', 0, true, null, null),
   ('Tarj. Débito', 'Tarjeta', 'tarjeta', 0, true, null, null),
   ('Tarj. Crédito', 'Tarjeta', 'credito', 0, true, null, null),
+  -- Las transferencias entran acá: misma cuenta, misma plata (Marcos, 21/10).
   ('Mercado Pago', 'Online', 'mercadopago', 3.5, true, null, null),
-  ('Transferencia', 'Bancario', 'transferencia', 0, true, null, null),
   ('Mercado Pago QR', 'Online', 'qr', null, true, null, null),
   ('Online Pedidos Ya', 'Online', null, null, true, 'Pedidos Ya', true);
 

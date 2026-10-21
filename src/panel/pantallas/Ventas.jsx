@@ -166,8 +166,9 @@ function NuevoPedido({ modalidad, onCerrar }) {
             <div className="grid grid-cols-2 gap-2">
               <select value={pagoVigente} onChange={(e) => setPago(e.target.value)} className={input}>
                 <option value="efectivo">Efectivo</option>
+                {/* «Transferencia» salió de acá: es la misma plata que Mercado
+                    Pago y tenerlas separadas partía el arqueo en dos. */}
                 <option value="mercadopago">Mercado Pago</option>
-                <option value="transferencia">Transferencia</option>
                 {/* Ninguna de las dos va en delivery: el posnet y el QR del
                     local quedan en el mostrador, el repartidor no los lleva. */}
                 {modalidad !== 'delivery' && <option value="tarjeta">Tarj. Débito</option>}

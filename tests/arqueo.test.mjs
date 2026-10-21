@@ -33,7 +33,20 @@ test('cada venta cae en la forma de cobro que corresponde', () => {
   assert.equal(s.porMedio['Mercado Pago'], 7000)
   assert.equal(s.porMedio['Online Pedidos Ya'], 8000)
   assert.equal(s.porMedio['Tarj. Débito'], 0)
-  assert.equal(s.porMedio['Transferencia'], 0)
+  assert.equal(
+    s.porMedio['Transferencia'],
+    undefined,
+    'Transferencia ya no es una forma de cobro: no abre renglon en el cierre',
+  )
+})
+
+test('una venta vieja por transferencia se cuenta en Mercado Pago', () => {
+  // Hay meses de ventas guardadas con esa palabra. Si no cayeran en ningun
+  // renglon, el empleado contaria mas plata de la que el sistema dice tener y
+  // el cierre marcaria un sobrante que no existe.
+  const s = calcularArqueo(arqueo, [ped(7000, 'transferencia', 'Tienda Online')], [], MEDIOS_PAGO)
+  assert.equal(s.porMedio['Mercado Pago'], 7000)
+  assert.equal(s.ventas, 7000)
 })
 
 test('el origen manda sobre la forma de pago', () => {

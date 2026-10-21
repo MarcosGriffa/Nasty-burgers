@@ -1,6 +1,11 @@
 node_modules/
 dist/
 dist-single/
+# Lo que se publica se compila en Netlify a partir del codigo: tenerlo
+# tambien adentro del repo solo agrega ruido y copias que se desincronizan.
+dist-web/
+dist-panel/
+dist-demo/
 entrega/
 .env
 .env.local

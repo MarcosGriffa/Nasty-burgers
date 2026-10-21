@@ -1,5 +1,6 @@
 import { NEGOCIO, LOCALES } from '../data/negocio'
 import { pesos, fechaHora, nombreCompleto } from './utils'
+import { etiquetaPago } from './cobros'
 
 /**
  * Impresión de comandas en la térmica del local.
@@ -205,7 +206,9 @@ export function imprimirComandaCocina(pedido) {
 
 /** Ticket para el cliente / repartidor: con precios, total y dirección. */
 export function imprimirTicket(pedido) {
-  const pago = { efectivo: 'Efectivo', mercadopago: 'Mercado Pago', transferencia: 'Transferencia', tarjeta: 'Tarjeta' }
+  // El nombre de la forma de cobro sale de cobros.js y no de una lista acá.
+  // Esta copia se había quedado vieja: no conocía ni el QR ni la tarjeta de
+  // crédito, así que el ticket de una venta por QR salía impreso diciendo «qr».
   lanzar(`
     ${cabecera(pedido, 'TICKET DEL PEDIDO')}
     <hr>
@@ -216,7 +219,7 @@ export function imprimirTicket(pedido) {
       ${pedido.descuento ? `<tr><td>Descuento</td><td class="prec">-${pesos(pedido.descuento)}</td></tr>` : ''}
       ${pedido.envio ? `<tr><td>Envío</td><td class="prec">${pesos(pedido.envio)}</td></tr>` : ''}
       <tr class="g"><td>TOTAL</td><td class="prec">${pesos(pedido.total)}</td></tr>
-      <tr><td>Pago</td><td class="prec">${escapar(pago[pedido.pago] ?? pedido.pago ?? '-')}</td></tr>
+      <tr><td>Pago</td><td class="prec">${escapar(pedido.pago ? etiquetaPago(pedido.pago) : '-')}</td></tr>
     </table>
     <hr>
     <div class="b">${escapar(pedido.cliente_nombre ?? '')}</div>

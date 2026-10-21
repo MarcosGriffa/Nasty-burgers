@@ -211,9 +211,15 @@ export default function Pedido({ carrito, drawerAbierto, setDrawerAbierto }) {
 
         <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
           <div className="space-y-12">
+            {/* Sin búsqueda, un menú vacío no es "no hay resultados": es que la
+                carta todavía no llegó o no cargó. Decirle al cliente «no
+                encontramos nada con ""» lo manda a buscar un error que no
+                cometió, y encima tapa el problema de verdad. */}
             {categorias.length === 0 && (
               <p className="py-16 text-center text-ash">
-                No encontramos nada con “{busqueda}”.
+                {busqueda
+                  ? `No encontramos nada con “${busqueda}”.`
+                  : 'Estamos cargando la carta. Si no aparece en unos segundos, recargá la página.'}
               </p>
             )}
             {categorias.map((c) => (

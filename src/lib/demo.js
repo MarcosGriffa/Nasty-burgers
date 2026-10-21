@@ -72,7 +72,7 @@ export const COMANDAS_EJEMPLO = [
     subtotal: 38400,
     descuento: 0,
     total: 38400,
-    pago: 'transferencia',
+    pago: 'mercadopago',
     estado: 'preparando',
     demora_min: 40,
     efectivo_cobrado: false,
@@ -128,7 +128,7 @@ const PESO_CATEGORIA = { dobles: 40, triples: 22, simples: 16, pampera: 5, promo
 const NOMBRES = ['Julián', 'Sofía', 'Martín', 'Camila', 'Nicolás', 'Valentina', 'Lucas', 'Agustina', 'Tomás', 'Micaela', 'Franco', 'Rocío', 'Ezequiel', 'Brenda', 'Iván', 'Daniela', 'Matías', 'Carla', 'Gonzalo', 'Belén']
 const APELLIDOS = ['Ramos', 'Benítez', 'Ferreyra', 'Ortiz', 'Sosa', 'Giménez', 'Molina', 'Peralta', 'Aguirre', 'Cabrera', 'Vera', 'Ledesma', 'Ríos', 'Acosta', 'Núñez']
 const CALLES = ['Los Aromos', 'Av. Alvear', 'Belgrano', 'Rivadavia', 'Los Ceibos', 'San Martín', 'Colectora Este', 'Las Camelias', 'Mitre', 'Sarmiento']
-const PAGOS = ['efectivo', 'efectivo', 'efectivo', 'mercadopago', 'mercadopago', 'transferencia', 'tarjeta']
+const PAGOS = ['efectivo', 'efectivo', 'efectivo', 'mercadopago', 'mercadopago', 'qr', 'tarjeta', 'credito']
 
 function elegirItem(r) {
   const bolsa = []

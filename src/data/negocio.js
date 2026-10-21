@@ -134,7 +134,7 @@ export const CATEGORIAS = [
     items: [
       { id: 'ex-bacon', nombre: 'Extra bacon', desc: '', precio: 1500, img: 'extra-bacon.jpg' },
       { id: 'ex-cheddar', nombre: 'Extra cheddar en fetas x2', desc: '', precio: 1500, img: 'extra-cheddar.jpg' },
-      { id: 'ex-medallon', nombre: 'Medallón extra + cheddar', desc: '', precio: 4700 },
+      { id: 'ex-medallon', nombre: 'Medallón extra + cheddar', desc: '', precio: 4700, img: 'medallon-extra.jpg' },
       { id: 'cheeseburger', nombre: 'CheeseBurger', desc: 'Sumá una hamburguesa con queso.', precio: 10300, img: 'cheeseburger.jpg' },
       { id: 'cheeseburger-papas', nombre: 'CheeseBurger c/ papas', desc: '', precio: 11500, img: 'cheeseburger.jpg' },
     ],
@@ -154,11 +154,11 @@ export const CATEGORIAS = [
     nombre: 'Cerveza',
     bajada: 'Imperial, línea completa.',
     items: [
-      { id: 'imp-golden', nombre: 'Imperial Golden', desc: '', precio: 3000 },
-      { id: 'imp-stout', nombre: 'Imperial Cream Stout', desc: '', precio: 3000 },
-      { id: 'imp-apa', nombre: 'Imperial APA', desc: '', precio: 3000 },
-      { id: 'imp-ipa', nombre: 'Imperial IPA', desc: '', precio: 3000 },
-      { id: 'imp-lager', nombre: 'Imperial Extra Lager', desc: '', precio: 3000 },
+      { id: 'imp-golden', nombre: 'Imperial Golden', desc: '', precio: 3000, img: 'imperial-golden.jpg' },
+      { id: 'imp-stout', nombre: 'Imperial Cream Stout', desc: '', precio: 3000, img: 'imperial-stout.jpg' },
+      { id: 'imp-apa', nombre: 'Imperial APA', desc: '', precio: 3000, img: 'imperial-apa.jpg' },
+      { id: 'imp-ipa', nombre: 'Imperial IPA', desc: '', precio: 3000, img: 'imperial-ipa.jpg' },
+      { id: 'imp-lager', nombre: 'Imperial Extra Lager', desc: '', precio: 3000, img: 'imperial-lager.jpg' },
     ],
   },
 ]

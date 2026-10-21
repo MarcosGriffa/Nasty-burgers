@@ -29,7 +29,19 @@ Nombres que ya están en uso:
 
   (-s = simple, -d = doble, -t = triple)
 
+  agua.jpg        coca.jpg        coca-zero.jpg   sprite.jpg
+  extra-bacon.jpg extra-cheddar.jpg               cheeseburger.jpg
+  medallon-extra.jpg              papas.jpg       pampera.jpg
+
+  imperial-golden.jpg   imperial-stout.jpg   imperial-apa.jpg
+  imperial-ipa.jpg      imperial-lager.jpg
+
 Las de Melt son las de la Melt 2.0, y las usa tanto la del menú como la
 promo de los miércoles.
 
-Todavía sin foto propia: NBC, La Pampera, las papas y las bebidas.
+Todavía sin foto propia: NBC.
+
+Para dejar una foto nueva con el mismo formato que las demás —cuadrada, el
+producto centrado sobre blanco y liviana— hay un script:
+
+  python3 scripts/preparar-fotos.py la-foto-original.png src/img/nombre.jpg

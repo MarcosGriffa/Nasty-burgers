@@ -334,8 +334,9 @@ export const MEDIOS_PAGO = [
   // Débito y crédito se cuentan por separado al cerrar la caja (Marcos, 20/10).
   // El 0 % sale de D6: al local no le cobran arancel por tarjeta.
   { nombre: 'Tarj. Crédito', tipo: 'Tarjeta', clave: 'credito', comision: 0, activo: true },
+  // Acá adentro entran también las transferencias: van a la misma cuenta de
+  // Mercado Pago, así que es una sola forma de cobro (Marcos, 21/10).
   { nombre: 'Mercado Pago', tipo: 'Online', clave: 'mercadopago', comision: 3.5, activo: true },
-  { nombre: 'Transferencia', tipo: 'Bancario', clave: 'transferencia', comision: 0, activo: true },
   // El QR SÍ tiene clave: lo cobra el empleado en el mostrador y lo marca como
   // tal, así que el sistema puede contarlo igual que el efectivo.
   { nombre: 'Mercado Pago QR', tipo: 'Online', clave: 'qr', comision: null, activo: true },

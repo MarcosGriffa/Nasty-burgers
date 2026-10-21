@@ -11,7 +11,10 @@ import { modoDemo } from '../lib/supabase'
 // no cumplirlo abajo, en el total, es peor que no ofrecerlo.
 const PAGOS = [
   { id: 'efectivo', label: 'Efectivo', notaRetiro: '10% OFF' },
-  { id: 'transferencia', label: 'Transferencia' },
+  // Antes decía «Transferencia». Es la misma plata que Mercado Pago —misma
+  // cuenta, mismo destino— así que mostrarlas como dos opciones distintas
+  // confundía al cliente y abría dos renglones en el arqueo (Marcos, 21/10).
+  { id: 'mercadopago', label: 'Mercado Pago' },
   // El posnet está en el local: el repartidor no lo lleva, así que con
   // delivery la tarjeta no es una opción real. Ofrecerla y que después no se
   // pueda cobrar es peor que no ofrecerla (Marcos, 14/10).

@@ -62,11 +62,24 @@ FALLO=0
 echo "· Base como quedó el 13/10:"
 for f in 1-esquema 2-columnas 3-datos; do correr "$f.sql"; done
 
+SUELTOS="4-sacar-sin-que 5-sacar-promo-melt 6-fotos 7-arqueo 8-tarjeta-credito 10-pagos-y-fotos"
+
+# La base del local todavía tiene la forma de cobro vieja y ventas hechas con
+# ella; el repo ya no las siembra. Sin esto, el 10 se probaría contra una base
+# que no tiene el problema que viene a arreglar.
+echo "· Y le ponemos lo que la base del local todavía tiene:"
+psql -q -d nasty -f "$REPO/scripts/como-esta-hoy.sql" 2>&1 | grep -iE "ERROR" | sed 's/^/      /'
+
 echo "· Archivos sueltos, primera pasada:"
-for f in 4-sacar-sin-que 5-sacar-promo-melt 6-fotos 7-arqueo 8-tarjeta-credito; do correr "$f.sql"; done
+for f in $SUELTOS; do correr "$f.sql"; done
 
 echo "· Y otra vez, que se tienen que poder repetir:"
-for f in 4-sacar-sin-que 5-sacar-promo-melt 6-fotos 7-arqueo 8-tarjeta-credito; do correr "$f.sql"; done
+for f in $SUELTOS; do correr "$f.sql"; done
+
+echo "· Lo que tiene que haber pasado:"
+psql -tA -d nasty -f "$REPO/scripts/revisar-10.sql" 2>&1 \
+  | grep -E "OK|MAL" | sed 's/^/  /'
+psql -tA -d nasty -f "$REPO/scripts/revisar-10.sql" 2>&1 | grep -q "MAL" && FALLO=1
 
 echo "· La verificación:"
 psql -d nasty -f "$REPO/supabase/0-verificar.sql" 2>&1 | sed 's/^/  /'

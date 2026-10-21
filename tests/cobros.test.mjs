@@ -7,9 +7,12 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
   aplicaDescuentoEfectivo,
+  CLAVES,
+  claveVigente,
   comisionDePedido,
   comisiones,
   descuentoPorEfectivo,
+  etiquetaPago,
   medioDe,
   porcentajeDe,
 } from '../src/lib/cobros.js'
@@ -103,4 +106,47 @@ test('debito y credito se cuentan por separado', () => {
 test('los pedidos viejos que dicen "tarjeta" siguen enganchando con el debito', () => {
   // Cambiar la clave a 'debito' habria dejado todas esas ventas huerfanas.
   assert.equal(medioDe(MEDIOS_PAGO, 'tarjeta')?.nombre, 'Tarj. Débito')
+})
+
+// ---------------------------------------------------------------------------
+// TRANSFERENCIA Y MERCADO PAGO SON LA MISMA PLATA (Marcos, 21/10)
+// ---------------------------------------------------------------------------
+
+test('transferencia ya no es una forma de cobro aparte', () => {
+  assert.equal(
+    CLAVES.includes('transferencia'),
+    false,
+    'no se le ofrece mas al cliente ni al empleado',
+  )
+})
+
+test('las ventas viejas por transferencia no quedan huerfanas', () => {
+  // Son meses de ventas ya guardadas con esa palabra. Si no engancharan, el
+  // arqueo no las contaria y el Estado de resultados les calcularia 0 % de
+  // arancel cuando en realidad Mercado Pago cobro su 3,5 %.
+  assert.equal(medioDe(MEDIOS_PAGO, 'transferencia')?.nombre, 'Mercado Pago')
+  assert.equal(etiquetaPago('transferencia'), 'Mercado Pago')
+  assert.equal(comisionDePedido({ pago: 'transferencia', total: 10000 }, MEDIOS_PAGO), 350)
+})
+
+test('en el desglose suman en la misma fila, no en dos', () => {
+  const d = comisiones(
+    [
+      { pago: 'transferencia', total: 10000 },
+      { pago: 'mercadopago', total: 10000 },
+    ],
+    MEDIOS_PAGO,
+  )
+  assert.equal(d.filas.length, 1, 'un solo renglon para Mercado Pago')
+  assert.equal(d.filas[0].bruto, 20000)
+  assert.equal(d.filas[0].cantidad, 2)
+  assert.equal(d.brutoSinAsignar, 0)
+})
+
+test('una clave que no conocemos se sigue mostrando tal cual', () => {
+  // La equivalencia traduce lo viejo, no tapa lo desconocido: si aparece algo
+  // raro en la base tiene que verse, no disfrazarse de Mercado Pago.
+  assert.equal(etiquetaPago('criptomonedas'), 'criptomonedas')
+  assert.equal(medioDe(MEDIOS_PAGO, 'criptomonedas'), null)
+  assert.equal(claveVigente(null), null)
 })

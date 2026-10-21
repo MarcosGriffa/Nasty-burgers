@@ -224,7 +224,9 @@ function ponerAlDiaGrupos(semilla) {
 const CLAVE_POR_NOMBRE = {
   efectivo: 'efectivo',
   mercadopago: 'mercadopago',
-  transferencia: 'transferencia',
+  // «Transferencia» es Mercado Pago: una instalación vieja que tenga esa fila
+  // se engancha al mismo arancel en vez de quedarse sin clave.
+  transferencia: 'mercadopago',
 }
 
 // "Mercado Pago", "mercado pago" y "MercadoPago" son el mismo medio

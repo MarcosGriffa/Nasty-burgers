@@ -32,7 +32,6 @@
 export const CLAVES_PAGO = [
   { clave: 'efectivo', label: 'Efectivo' },
   { clave: 'mercadopago', label: 'Mercado Pago' },
-  { clave: 'transferencia', label: 'Transferencia' },
   // `tarjeta` es el débito. Se deja con ese nombre de clave —y no `debito`—
   // porque los pedidos que ya están guardados dicen 'tarjeta': cambiarla
   // dejaría esas ventas sin medio asignado.
@@ -43,13 +42,32 @@ export const CLAVES_PAGO = [
 
 export const CLAVES = CLAVES_PAGO.map((p) => p.clave)
 
+/**
+ * Formas de cobro que antes eran dos y hoy son una.
+ *
+ * «Transferencia» y «Mercado Pago» estaban como botones distintos, y es la
+ * misma plata entrando a la misma cuenta (Marcos, 21/10). Quedó «Mercado
+ * Pago» sola, pero los pedidos que ya están guardados siguen diciendo
+ * 'transferencia' en la base, y esas ventas no se pueden quedar huérfanas: sin
+ * medio asignado no se les calcula arancel y no aparecen en el arqueo.
+ *
+ * Por eso la equivalencia se traduce acá, en un solo lugar, en vez de ir a
+ * reescribir el historial. El SQL igual pone al día lo que ya estaba, pero
+ * esto cubre lo que todavía no se migró y cualquier pedido viejo que aparezca.
+ */
+const EQUIVALENTES = { transferencia: 'mercadopago' }
+
+/** La forma de cobro de hoy que corresponde a esta clave (puede ser vieja). */
+export const claveVigente = (clave) => (clave ? (EQUIVALENTES[clave] ?? clave) : null)
+
 export const etiquetaPago = (clave) =>
-  CLAVES_PAGO.find((p) => p.clave === clave)?.label ?? clave ?? 'Otro'
+  CLAVES_PAGO.find((p) => p.clave === claveVigente(clave))?.label ?? clave ?? 'Otro'
 
 /** El medio de pago configurado que corresponde a esta forma de pago, o null. */
 export function medioDe(medios, clave) {
-  if (!clave) return null
-  return (medios || []).find((m) => m.clave === clave && m.activo !== false) ?? null
+  const vigente = claveVigente(clave)
+  if (!vigente) return null
+  return (medios || []).find((m) => m.clave === vigente && m.activo !== false) ?? null
 }
 
 /** El arancel del medio, saneado: nunca negativo, nunca NaN. */
@@ -75,7 +93,10 @@ export function comisiones(pedidos = [], medios = []) {
   const mapa = new Map()
 
   pedidos.forEach((p) => {
-    const clave = p?.pago || 'otro'
+    // Vigente y no cruda: así las ventas viejas de «Transferencia» suman en la
+    // misma fila que las de Mercado Pago, en vez de abrir dos renglones de algo
+    // que en el banco es uno solo.
+    const clave = claveVigente(p?.pago) || 'otro'
     const e = mapa.get(clave) ?? { clave, bruto: 0, cantidad: 0 }
     e.bruto += p?.total || 0
     e.cantidad += 1
