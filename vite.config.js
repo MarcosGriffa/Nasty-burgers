@@ -2,11 +2,35 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { viteSingleFile } from 'vite-plugin-singlefile'
+import { fileURLToPath } from 'node:url'
 
 // BUILD_SINGLE=1 npm run build  ->  genera un unico index.html autocontenido
 // npm run build                 ->  build normal para Vercel / Netlify
 const single = process.env.BUILD_SINGLE === '1'
 const esPanel = process.env.VITE_INICIO === 'panel'
+const soloWeb = process.env.VITE_SOLO_WEB === '1'
+
+/**
+ * En la version publica, el panel se reemplaza por un modulo vacio.
+ *
+ * El `import()` dinamico de App.jsx no alcanza: aunque la condicion sea falsa y
+ * nunca se ejecute, el empaquetador genera igual un archivo aparte con TODO el
+ * panel adentro, y ese archivo queda publicado en el sitio. Cambiando a que
+ * modulo apunta, lo que se empaqueta son cuatro lineas.
+ */
+const sacarElPanel = () => ({
+  name: 'sacar-el-panel-de-la-web-publica',
+  // 'pre' para que se resuelva antes que el resolvedor de Vite: si llega
+  // despues, el import ya quedo apuntando al panel de verdad.
+  enforce: 'pre',
+  resolveId(fuente) {
+    if (!soloWeb) return null
+    if (/(^|\/)panel\/Shell(\.jsx)?$/.test(fuente)) {
+      return fileURLToPath(new URL('./src/panel/sin-panel.jsx', import.meta.url))
+    }
+    return null
+  },
+})
 
 /**
  * El sitio del local no es para que lo encuentre nadie.
@@ -45,7 +69,13 @@ const marcarComoPrivado = () => ({
 
 export default defineConfig({
   base: './',
-  plugins: [react(), tailwindcss(), marcarComoPrivado(), ...(single ? [viteSingleFile()] : [])],
+  plugins: [
+    react(),
+    tailwindcss(),
+    sacarElPanel(),
+    marcarComoPrivado(),
+    ...(single ? [viteSingleFile()] : []),
+  ],
   build: {
     // en modo single-file inlineamos tambien las fuentes
     assetsInlineLimit: single ? 100_000_000 : 4096,
