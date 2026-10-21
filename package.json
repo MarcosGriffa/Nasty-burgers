@@ -13,7 +13,8 @@
     "sql": "node scripts/generar-datos-sql.mjs",
     "test": "node --test --test-force-exit --import ./tests/registrar-loader.mjs 'tests/**/*.test.mjs'",
     "build:web": "VITE_SOLO_WEB=1 BUILD_SINGLE=1 vite build",
-    "build:publicar": "VITE_SOLO_WEB=1 vite build"
+    "publicar:web": "VITE_SOLO_WEB=1 vite build --outDir dist-web",
+    "publicar:panel": "VITE_INICIO=panel vite build --outDir dist-panel"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
