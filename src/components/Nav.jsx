@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { SOLO_WEB } from '../lib/entorno'
 import { NEGOCIO } from '../data/negocio'
 import { modoDemo } from '../lib/supabase'
 import { irA } from '../lib/ruta'
@@ -55,7 +56,7 @@ export default function Nav() {
         </nav>
 
         <div className="flex items-center gap-2">
-          {modoDemo && (
+          {modoDemo && !SOLO_WEB && (
             <button
               type="button"
               onClick={() => irA('/panel')}
@@ -115,7 +116,7 @@ export default function Nav() {
           >
             Instagram
           </a>
-          {modoDemo && (
+          {modoDemo && !SOLO_WEB && (
             <button
               type="button"
               onClick={() => {

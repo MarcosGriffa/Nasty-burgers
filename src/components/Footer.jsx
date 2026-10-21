@@ -1,4 +1,5 @@
 import { NEGOCIO } from '../data/negocio'
+import { SOLO_WEB } from '../lib/entorno'
 import { irA } from '../lib/ruta'
 
 export default function Footer() {
@@ -62,13 +63,16 @@ export default function Footer() {
           <p className="text-xs text-ash/70">
             © {new Date().getFullYear()} {NEGOCIO.nombre}. Todos los derechos reservados.
           </p>
-          <button
-            type="button"
-            onClick={() => irA('/panel')}
-            className="text-[11px] font-bold uppercase tracking-widest text-ash/60 hover:text-amber"
-          >
-            Panel del local
-          </button>
+          {/* La puerta del sistema no se anuncia en la web del cliente. */}
+          {!SOLO_WEB && (
+            <button
+              type="button"
+              onClick={() => irA('/panel')}
+              className="text-[11px] font-bold uppercase tracking-widest text-ash/60 hover:text-amber"
+            >
+              Panel del local
+            </button>
+          )}
         </div>
       </div>
     </footer>
